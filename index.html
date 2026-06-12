@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏠 CRM Comercial Inmobiliario</title>
+<style>
+  :root {
+    --bg: #F7F6F3;
+    --surface: #FFFFFF;
+    --border: #E8E6E0;
+    --border-light: #F0EEE9;
+    --text: #1A1916;
+    --text-2: #6B6960;
+    --text-3: #A09D95;
+    --accent: #2563EB;
+    --accent-bg: #EFF6FF;
+    --green: #16A34A;
+    --green-bg: #F0FDF4;
+    --amber: #D97706;
+    --amber-bg: #FFFBEB;
+    --red: #DC2626;
+    --red-bg: #FEF2F2;
+    --purple: #7C3AED;
+    --purple-bg: #F5F3FF;
+    --teal: #0D9488;
+    --teal-bg: #F0FDFA;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+
+  /* ─── LAYOUT ─── */
+  .app { display: flex; min-height: 100vh; }
+  .sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); padding: 0; flex-shrink: 0; display: flex; flex-direction: column; }
+  .main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* ─── SIDEBAR ─── */
+  .logo { padding: 18px 16px 14px; border-bottom: 1px solid var(--border-light); }
+  .logo-mark { font-size: 20px; margin-bottom: 2px; }
+  .logo-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .logo-sub { font-size: 11px; color: var(--text-3); }
+
+  .nav-section { padding: 10px 0; }
+  .nav-label { font-size: 10px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; padding: 0 16px; margin-bottom: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 16px; font-size: 13px; color: var(--text-2); cursor: pointer; transition: background .12s; }
+  .nav-item:hover { background: var(--bg); color: var(--text); }
+  .nav-item.active { background: var(--accent-bg); color: var(--accent); font-weight: 500; }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-badge { margin-left: auto; background: var(--red); color: #fff; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 20px; min-width: 18px; text-align: center; }
+
+  .sidebar-footer { margin-top: auto; padding: 12px 16px; border-top: 1px solid var(--border-light); }
+  .btn-new { width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all .15s; }
+  .btn-new-send { background: var(--accent); color: #fff; margin-bottom: 6px; }
+  .btn-new-send:hover { background: #1D4ED8; }
+  .btn-new-req { background: var(--purple-bg); color: var(--purple); border: 1px solid #C4B5FD; }
+  .btn-new-req:hover { background: #EDE9FE; }
+
+  /* ─── HEADER ─── */
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .header-title { font-size: 17px; font-weight: 600; flex: 1; }
+  .search-box { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 12px; font-size: 13px; color: var(--text-2); cursor: text; min-width: 200px; }
+
+  /* ─── KPI ROW ─── */
+  .kpi-bar { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; padding: 16px 24px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .kpi { background: var(--bg); border-radius: var(--radius); padding: 12px 14px; }
+  .kpi-label { font-size: 11px; color: var(--text-2); margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+  .kpi-num { font-size: 26px; font-weight: 700; line-height: 1; }
+  .kpi-sub { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+  .kpi-blue .kpi-num { color: var(--accent); }
+  .kpi-green .kpi-num { color: var(--green); }
+  .kpi-amber .kpi-num { color: var(--amber); }
+  .kpi-red .kpi-num { color: var(--red); }
+  .kpi-purple .kpi-num { color: var(--purple); }
+
+  /* ─── VIEW TABS ─── */
+  .view-tabs { display: flex; gap: 0; padding: 0 24px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; }
+  .view-tab { padding: 10px 14px; font-size: 13px; color: var(--text-2); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: color .12s; }
+  .view-tab:hover { color: var(--text); }
+  .view-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+
+  /* ─── TABLE ─── */
+  .table-wrap { flex: 1; overflow-y: auto; padding: 20px 24px; }
+  .table-container { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
+  .table-toolbar { padding: 10px 14px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: 8px; }
+  .toolbar-text { font-size: 12px; color: var(--text-3); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-3); background: var(--bg); border-bottom: 1px solid var(--border); white-space: nowrap; cursor: pointer; user-select: none; }
+  thead th:hover { color: var(--text-2); }
+  tbody tr { border-bottom: 1px solid var(--border-light); transition: background .1s; cursor: pointer; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #FAFAF8; }
+  tbody td { padding: 9px 12px; vertical-align: middle; }
+
+  .empty-state { padding: 48px; text-align: center; color: var(--text-3); }
+  .empty-icon { font-size: 36px; margin-bottom: 8px; }
+  .empty-text { font-size: 14px; margin-bottom: 4px; }
+  .empty-sub { font-size: 12px; }
+
+  /* ─── TAGS ─── */
+  .tag { display: inline-flex; align-items: center; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+  .tag-blue { background: var(--accent-bg); color: var(--accent); }
+  .tag-green { background: var(--green-bg); color: var(--green); }
+  .tag-amber { background: var(--amber-bg); color: var(--amber); }
+  .tag-red { background: var(--red-bg); color: var(--red); }
+  .tag-gray { background: var(--bg); color: var(--text-2); border: 1px solid var(--border); }
+  .tag-purple { background: var(--purple-bg); color: var(--purple); }
+  .tag-teal { background: var(--teal-bg); color: var(--teal); }
+
+  /* ─── BOARD ─── */
+  .board-wrap { flex: 1; overflow-x: auto; overflow-y: auto; padding: 20px 24px; }
+  .board { display: flex; gap: 12px; min-width: max-content; align-items: flex-start; }
+  .board-col { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: 240px; flex-shrink: 0; overflow: hidden; box-shadow: var(--shadow); }
+  .board-col-head { padding: 10px 12px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; }
+  .board-col-title { font-size: 12px; font-weight: 600; color: var(--text-2); }
+  .board-col-count { font-size: 11px; background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 0 7px; color: var(--text-3); }
+  .board-cards { padding: 8px; min-height: 80px; }
+  .board-card { background: var(--bg); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 6px; cursor: pointer; transition: box-shadow .15s; border: 1px solid var(--border-light); }
+  .board-card:last-child { margin-bottom: 0; }
+  .board-card:hover { box-shadow: var(--shadow); border-color: var(--border); }
+  .board-card-title { font-size: 12px; font-weight: 500; margin-bottom: 4px; }
+  .board-card-sub { font-size: 11px; color: var(--text-3); }
+
+  /* ─── MODAL ─── */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--surface); border-radius: var(--radius); width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,.2); }
+  .modal-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .modal-title { font-size: 15px; font-weight: 600; flex: 1; }
+  .modal-close { background: none; border: none; font-size: 20px; color: var(--text-3); cursor: pointer; padding: 0 4px; line-height: 1; }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 16px 20px; }
+  .modal-footer { padding: 12px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+
+  .field-row { margin-bottom: 14px; }
+  .field-label { font-size: 12px; font-weight: 500; color: var(--text-2); margin-bottom: 5px; display: block; }
+  .field-label span { color: var(--red); }
+  input[type=text], input[type=date], select, textarea {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 13px; font-family: inherit; color: var(--text); background: var(--surface);
+    transition: border-color .15s;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(37,99,235,.12); }
+  textarea { resize: vertical; min-height: 70px; }
+  .field-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .section-sep { font-size: 10px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; margin: 18px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border-light); }
+
+  /* Multi-select groups */
+  .groups-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .group-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg); font-size: 12px; color: var(--text-2); cursor: pointer; transition: all .12s; user-select: none; }
+  .group-chip.selected { background: var(--accent-bg); color: var(--accent); border-color: #93C5FD; }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all .15s; font-family: inherit; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #1D4ED8; }
+  .btn-ghost { background: var(--bg); color: var(--text-2); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--border-light); color: var(--text); }
+  .btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid #FCA5A5; }
+  .btn-danger:hover { background: #FEE2E2; }
+  .btn-teal { background: var(--teal-bg); color: var(--teal); border: 1px solid #99F6E4; }
+  .btn-teal:hover { background: #CCFBF1; }
+
+  /* Detail modal */
+  .detail-section { margin-bottom: 18px; }
+  .detail-section-title { font-size: 10px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+  .detail-field { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border-light); }
+  .detail-field:last-child { border-bottom: none; }
+  .detail-field-name { font-size: 12px; color: var(--text-2); width: 130px; flex-shrink: 0; padding-top: 1px; }
+  .detail-field-value { font-size: 13px; color: var(--text); flex: 1; }
+  .detail-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .detail-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; }
+  .tags-wrap { display: flex; flex-wrap: wrap; gap: 4px; }
+
+  /* Sub-table de inmuebles recibidos en solicitud */
+  .sub-table-wrap { background: var(--bg); border-radius: var(--radius-sm); border: 1px solid var(--border-light); overflow: hidden; margin-top: 8px; }
+  .sub-table-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid var(--border-light); }
+  .sub-table-title { font-size: 11px; font-weight: 600; color: var(--text-2); }
+  .sub-table-row { display: grid; grid-template-columns: 1fr 100px 80px; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--border-light); font-size: 12px; align-items: center; }
+  .sub-table-row:last-child { border-bottom: none; }
+  .sub-table-row-main { font-weight: 500; }
+  .sub-table-row-sub { color: var(--text-3); font-size: 11px; margin-top: 2px; }
+
+  /* Inline seguimiento row */
+  .seguimiento-box { background: var(--amber-bg); border: 1px solid #FDE68A; border-radius: var(--radius-sm); padding: 10px 12px; margin-top: 8px; }
+  .seguimiento-box.respondio-si { background: var(--green-bg); border-color: #BBF7D0; }
+  .seguimiento-box.respondio-no { background: var(--red-bg); border-color: #FCA5A5; }
+
+  /* Groups config */
+  .groups-config { padding: 16px 20px; }
+  .group-config-item { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border-light); }
+  .group-config-item:last-child { border-bottom: none; }
+  .group-name-input { flex: 1; }
+  .btn-icon { background: none; border: none; padding: 4px 6px; cursor: pointer; color: var(--text-3); font-size: 16px; border-radius: 4px; transition: background .12s; }
+  .btn-icon:hover { background: var(--bg); color: var(--text); }
+
+  /* Estado preview banner en modal */
+  #modal-sol-estado-preview { font-size:12px; color:var(--text-2); background:var(--amber-bg); border:1px solid #FDE68A; border-radius:var(--radius-sm); padding:8px 12px; }
+
+  /* Seguimiento inmueble badge */
+  .seg-badge { display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500; }
+  .seg-badge-eval   { background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE; }
+  .seg-badge-inter  { background:var(--green-bg);color:var(--green);border:1px solid #BBF7D0; }
+  .seg-badge-visita { background:var(--amber-bg);color:var(--amber);border:1px solid #FDE68A; }
+  .seg-badge-negoc  { background:var(--teal-bg);color:var(--teal);border:1px solid #99F6E4; }
+  .seg-badge-no     { background:var(--red-bg);color:var(--red);border:1px solid #FCA5A5; }
+
+  /* Inmobiliaria badge */
+  .tag-inmo { background: #FFF7ED; color: #C2410C; border: 1px solid #FED7AA; }
+  .inmo-badge { display:inline-flex;align-items:center;gap:4px;font-size:11px;background:#FFF7ED;color:#C2410C;border:1px solid #FED7AA;border-radius:20px;padding:2px 8px;font-weight:500; }
+
+  /* Status quick-change */
+  .status-quick { display:flex;gap:6px;flex-wrap:wrap;margin-top:6px; }
+  .status-btn { padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg);font-size:11px;font-weight:500;cursor:pointer;transition:all .12s;color:var(--text-2); }
+  .status-btn:hover { background:var(--border-light); }
+  .status-btn.active-pend { background:var(--amber-bg);color:var(--amber);border-color:#FDE68A; }
+  .status-btn.active-activa { background:var(--accent-bg);color:var(--accent);border-color:#93C5FD; }
+  .status-btn.active-cerrada { background:var(--bg);color:var(--text-2);border-color:var(--border); }
+
+  /* Cierre motivo */
+  .cierre-motivo-wrap { margin-top:8px;padding:10px 12px;background:var(--red-bg);border:1px solid #FCA5A5;border-radius:var(--radius-sm); }
+
+  /* Dashboard split KPI */
+  .kpi-bar-split { display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:16px 24px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0; }
+  .kpi-group { background:var(--bg);border-radius:var(--radius);padding:10px 14px;border:1px solid var(--border-light); }
+  .kpi-group-title { font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px; }
+  .kpi-group-row { display:grid;grid-template-columns:repeat(2,1fr);gap:8px; }
+
+  /* Feedback por propiedad en enviado */
+  .prop-feedback-row { display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border-light); }
+  .prop-feedback-row:last-child { border-bottom:none; }
+  .prop-feedback-name { font-size:12px;font-weight:500;flex:1; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    .sidebar { width: 60px; }
+    .logo-name, .logo-sub, .nav-label, .nav-item span:not(.nav-icon) { display: none; }
+    .nav-item { justify-content: center; padding: 10px; }
+    .kpi-bar { grid-template-columns: repeat(2,1fr); }
+    .sidebar-footer .btn-new span { display: none; }
+    .btn-new { padding: 8px; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">🏠</div>
+      <div class="logo-name">CRM Inmobiliario</div>
+      <div class="logo-sub">Control Comercial</div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Vistas</div>
+      <div class="nav-item active" onclick="setView('hoy',event)">
+        <span class="nav-icon">🗓️</span><span>Hoy</span>
+      </div>
+      <div class="nav-item" onclick="setView('todos',event)">
+        <span class="nav-icon">📋</span><span>Todos</span>
+      </div>
+      <div class="nav-item" onclick="setView('enviados',event)">
+        <span class="nav-icon">📤</span><span>Enviados</span>
+      </div>
+      <div class="nav-item" onclick="setView('pipeline',event)">
+        <span class="nav-icon">🔀</span><span>Pipeline</span>
+      </div>
+      <div class="nav-item" onclick="setView('solicitudes',event)">
+        <span class="nav-icon">📥</span><span>Solicitudes</span>
+        <span class="nav-badge" id="badge-sol">0</span>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Reportes</div>
+      <div class="nav-item" onclick="setView('semanal',event)">
+        <span class="nav-icon">📆</span><span>Vista semanal</span>
+      </div>
+      <div class="nav-item" onclick="setView('mensual',event)">
+        <span class="nav-icon">📅</span><span>Vista mensual</span>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Opciones</div>
+      <div class="nav-item" onclick="openGroupsConfig()">
+        <span class="nav-icon">💬</span><span>Grupos WA</span>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="btn-new btn-new-send" onclick="openNew('enviado')">
+        <span>➕</span><span>Enviado</span>
+      </button>
+      <button class="btn-new btn-new-req" onclick="openNew('solicitud')">
+        <span>📥</span><span>Solicitud</span>
+      </button>
+      <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border-light);">
+        <div id="user-email-label" style="font-size:11px; color:var(--text-3);
+          margin-bottom:6px; text-overflow:ellipsis; overflow:hidden;
+          white-space:nowrap; text-align:center;" title=""></div>
+        <button onclick="logoutFirebase()" style="
+          width:100%; display:flex; align-items:center; justify-content:center;
+          gap:6px; padding:7px; border-radius:var(--radius-sm); font-size:12px;
+          font-weight:500; cursor:pointer; border:1px solid var(--border);
+          background:#fff; color:var(--text-2); transition:all .15s;"
+          onmouseover="this.style.background='#FEF2F2';this.style.color='#DC2626';this.style.borderColor='#FECACA';"
+          onmouseout="this.style.background='#fff';this.style.color='var(--text-2)';this.style.borderColor='var(--border)';">
+          🚪 Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-title" id="view-title">🗓️ Hoy</div>
+      <div class="search-box" onclick="document.getElementById('search-input').focus()">
+        🔍 <input id="search-input" type="text" placeholder="Buscar inmueble, asesor…" style="background:none;border:none;outline:none;flex:1;font-size:13px;color:var(--text)" oninput="render()">
+      </div>
+    </div>
+
+    <!-- KPIs SPLIT -->
+    <div class="kpi-bar-split" id="kpi-bar-container">
+      <!-- Enviados group -->
+      <div class="kpi-group">
+        <div class="kpi-group-title">📤 Enviados</div>
+        <div class="kpi-group-row">
+          <div class="kpi kpi-blue" style="padding:10px 12px;">
+            <div class="kpi-label">Hoy</div>
+            <div class="kpi-num" id="k1">0</div>
+            <div class="kpi-sub">Tipo = Enviado</div>
+          </div>
+          <div class="kpi kpi-green" style="padding:10px 12px;">
+            <div class="kpi-label">✅ Con respuesta</div>
+            <div class="kpi-num" id="k2">0</div>
+            <div class="kpi-sub">Respondió = Sí</div>
+          </div>
+          <div class="kpi kpi-amber" style="padding:10px 12px;">
+            <div class="kpi-label">⏳ Sin respuesta</div>
+            <div class="kpi-num" id="k3">0</div>
+            <div class="kpi-sub">Pendientes</div>
+          </div>
+          <div class="kpi kpi-purple" style="padding:10px 12px;">
+            <div class="kpi-label">💬 Total resp.</div>
+            <div class="kpi-num" id="k5">0</div>
+            <div class="kpi-sub">Todas las respuestas</div>
+          </div>
+        </div>
+      </div>
+      <!-- Solicitudes group -->
+      <div class="kpi-group">
+        <div class="kpi-group-title">📥 Solicitudes</div>
+        <div class="kpi-group-row">
+          <div class="kpi kpi-amber" style="padding:10px 12px;">
+            <div class="kpi-label">⏳ Pendientes</div>
+            <div class="kpi-num" id="k4">0</div>
+            <div class="kpi-sub">Estado = Pendiente</div>
+          </div>
+          <div class="kpi kpi-blue" style="padding:10px 12px;">
+            <div class="kpi-label">🔵 Activas</div>
+            <div class="kpi-num" id="k6">0</div>
+            <div class="kpi-sub">Estado = Activa</div>
+          </div>
+          <div class="kpi kpi-green" style="padding:10px 12px;">
+            <div class="kpi-label">🤝 Negociación</div>
+            <div class="kpi-num" id="k7">0</div>
+            <div class="kpi-sub">Cerró c/ negoc.</div>
+          </div>
+          <div class="kpi kpi-red" style="padding:10px 12px;">
+            <div class="kpi-label">❌ Desistió</div>
+            <div class="kpi-num" id="k8">0</div>
+            <div class="kpi-sub">Cliente desistió</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW TABS -->
+    <div class="view-tabs" id="view-tabs"></div>
+
+    <!-- CONTENT AREA -->
+    <div id="content-area" style="flex:1;overflow:hidden;display:flex;flex-direction:column;"></div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     MODAL: INMUEBLE ENVIADO
+════════════════════════════════════════════ -->
+<div class="modal-bg" id="modal-enviado">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-enviado-title">📤 Registrar inmueble enviado</div>
+      <button class="modal-close" onclick="closeModal('modal-enviado')">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Inmueble -->
+      <div class="field-row">
+        <label class="field-label">Inmueble <span>*</span></label>
+        <input type="text" id="fe-inmueble" placeholder="Ej: Apto El Parral — 2 hab / $85k">
+      </div>
+      <div class="field-row">
+        <label class="field-label">Fecha <span>*</span></label>
+        <input type="date" id="fe-fecha">
+      </div>
+
+      <!-- Asesor captador del inmueble -->
+      <div class="section-sep">Asesor del inmueble</div>
+      <div class="field-row">
+        <label class="field-label">Asesor captador</label>
+        <input type="text" id="fe-asesor" placeholder="Carlos Pérez">
+      </div>
+
+      <!-- Enviado a -->
+      <div class="section-sep">Enviado a</div>
+      <div class="field-row">
+        <label class="field-label">Grupos de WhatsApp</label>
+        <div class="groups-grid" id="fe-groups-picker"></div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-enviado')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEnviado()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- hidden fields still needed by saveEnviado -->
+<input type="hidden" id="fe-dest" value="">
+<input type="hidden" id="fe-respondio" value="Pendiente">
+<input type="hidden" id="fe-feedback" value="">
+<input type="hidden" id="fe-notas" value="">
+
+
+<!-- ═══════════════════════════════════════════
+     MODAL: REGISTRAR RESPUESTA
+════════════════════════════════════════════ -->
+<div class="modal-bg" id="modal-respuesta">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <div class="modal-title" id="mr-title">💬 Registrar respuesta de un asesor</div>
+      <button class="modal-close" onclick="closeModal('modal-respuesta')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <label class="field-label">Asesor que respondió <span>*</span></label>
+        <input type="text" id="mr-asesor" placeholder="Nombre del asesor">
+      </div>
+      <div class="field-row">
+        <label class="field-label">¿Pertenece a una inmobiliaria?</label>
+        <select id="mr-es-inmo" onchange="toggleMrInmo()">
+          <option value="No">No — asesor independiente</option>
+          <option value="Sí">Sí — pertenece a una inmobiliaria</option>
+        </select>
+      </div>
+      <div id="mr-inmo-wrap" style="display:none;">
+        <div class="field-row">
+          <label class="field-label">Nombre de la inmobiliaria</label>
+          <input type="text" id="mr-inmobiliaria" placeholder="Ej: Century 21, RE/MAX…">
+        </div>
+      </div>
+      <div class="field-row">
+        <label class="field-label">¿Se le envió el inmueble?</label>
+        <select id="mr-respondio" onchange="toggleMrExtra()">
+          <option value="Pendiente">⏳ Pendiente</option>
+          <option value="Sí">✅ Sí</option>
+          <option value="No">❌ No</option>
+        </select>
+      </div>
+      <div id="mr-extra" style="display:none;">
+        <div class="field-row">
+          <label class="field-label">Feedback recibido</label>
+          <select id="mr-feedback">
+            <option value="">— Sin especificar —</option>
+            <option value="Interesado">Interesado</option>
+            <option value="Solicita visita">Solicita visita</option>
+            <option value="No le interesa">No le interesa</option>
+            <option value="Precio alto">Precio alto</option>
+            <option value="Lo tiene en cartera">Lo tiene en cartera</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Nota de la respuesta</label>
+        <textarea id="mr-notas" placeholder="Qué dijeron, cómo respondieron…" style="min-height:60px;"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeRespuesta()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveRespuesta()">Guardar respuesta</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     MODAL: SEGUIMIENTO DE RESPUESTA
+════════════════════════════════════════════ -->
+<div class="modal-bg" id="modal-seguimiento">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <div class="modal-title">🔄 Seguimiento de respuesta</div>
+      <button class="modal-close" onclick="closeModal('modal-seguimiento')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <label class="field-label">Fecha del seguimiento</label>
+        <input type="date" id="ms-fecha">
+      </div>
+      <div class="field-row">
+        <label class="field-label">Estado del seguimiento</label>
+        <select id="ms-estado">
+          <option value="En negociación">🤝 En negociación</option>
+          <option value="Visita agendada">📅 Visita agendada</option>
+          <option value="Oferta enviada">📄 Oferta enviada</option>
+          <option value="Cerrado positivo">✅ Cerrado positivo</option>
+          <option value="Cerrado negativo">❌ Cerrado negativo</option>
+          <option value="Sin novedad">— Sin novedad</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Notas del seguimiento</label>
+        <textarea id="ms-notas" placeholder="¿Qué pasó? ¿Cuál es el próximo paso?…" style="min-height:70px;"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeSeguimiento()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveSeguimiento()">Guardar seguimiento</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ═══════════════════════════════════════════
+     MODAL: SOLICITUD
+════════════════════════════════════════════ -->
+<div class="modal-bg" id="modal-solicitud">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-sol-title">📥 Nueva solicitud recibida</div>
+      <button class="modal-close" onclick="closeModal('modal-solicitud')">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Datos de la solicitud -->
+      <div class="section-sep" style="margin-top:0;">Especificaciones de la solicitud</div>
+      <div class="field-row">
+        <label class="field-label">Descripción / qué busca <span>*</span></label>
+        <textarea id="fs-desc" placeholder="Ej: Casa 3 hab, zona este, hasta $120k, con patio…" style="min-height:80px;"></textarea>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Fecha <span>*</span></label>
+        <input type="date" id="fs-fecha">
+      </div>
+
+      <!-- Asesor tuyo que la hizo -->
+      <div class="section-sep">Asesor solicitante (tuyo)</div>
+      <div class="field-row">
+        <label class="field-label">Nombre del asesor <span>*</span></label>
+        <input type="text" id="fs-asesor" placeholder="Luis Mora">
+      </div>
+
+      <!-- Estado -->
+      <div class="section-sep">Estado de la solicitud</div>
+      <div class="field-row">
+        <label class="field-label">Estado actual</label>
+        <select id="fs-estado" onchange="toggleFsEstado()">
+          <option value="Pendiente">⏳ Pendiente — sin opciones aún</option>
+          <option value="Activa">🔵 Activa — en proceso</option>
+          <option value="Cerrada">🔒 Cerrada</option>
+        </select>
+      </div>
+      <div id="fs-cierre-wrap" style="display:none;">
+        <div class="field-row">
+          <label class="field-label">Motivo de cierre <span>*</span></label>
+          <select id="fs-cierre-motivo">
+            <option value="Negociación">🤝 Se hizo negociación / venta</option>
+            <option value="Desistió">❌ El cliente desistió</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Notas internas</label>
+        <textarea id="fs-notas" placeholder="Observaciones adicionales…" style="min-height:55px;"></textarea>
+      </div>
+
+    </div>
+    <div class="modal-footer" id="modal-sol-footer" style="flex-direction:column;gap:8px;align-items:stretch;">
+      <div id="modal-sol-estado-preview" style="display:none;padding:8px 10px;border-radius:var(--radius-sm);background:var(--bg);border:1px solid var(--border);font-size:12px;color:var(--text-2);text-align:center;"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="closeModal('modal-solicitud')">Cancelar</button>
+        <button class="btn btn-primary" id="modal-sol-save-btn" onclick="saveSolicitud()">Guardar solicitud</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     MODAL: AGREGAR INMUEBLE A SOLICITUD
+════════════════════════════════════════════ -->
+<div class="modal-bg" id="modal-inmueble-sol">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-inmueble-sol-title">🏠 Agregar inmueble recibido</div>
+      <button class="modal-close" onclick="closeModal('modal-inmueble-sol')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <label class="field-label">Nombre del inmueble <span>*</span></label>
+        <input type="text" id="fi-nombre" placeholder="Ej: Casa Colinas de Bello Monte 3h/2b">
+      </div>
+      <div class="field-row">
+        <label class="field-label">¿Quién lo mandó?</label>
+        <input type="text" id="fi-quien" placeholder="Nombre del asesor que te lo envió">
+      </div>
+      <div class="field-row-2">
+        <div>
+          <label class="field-label">¿Lo pasaste al asesor?</label>
+          <select id="fi-pasado">
+            <option value="No">No todavía</option>
+            <option value="Sí">Sí, pasado</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Feedback del asesor</label>
+          <select id="fi-feedback">
+            <option value="">— Sin feedback —</option>
+            <option value="Interesado">Interesado</option>
+            <option value="Solicita visita">Solicita visita</option>
+            <option value="No le interesa">No le interesa</option>
+            <option value="Precio alto">Precio alto</option>
+            <option value="Presupuesto no aplica">Presupuesto no aplica</option>
+            <option value="Zona no aplica">Zona no aplica</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Feedback detallado / comentarios del asesor</label>
+        <textarea id="fi-feedback-detalle" placeholder="¿Qué dijo el asesor sobre esta propiedad? ¿Hay interés? ¿Próximo paso?…" style="min-height:65px;"></textarea>
+      </div>
+      <div class="section-sep" style="margin-top:12px;">Seguimiento de esta propiedad</div>
+      <div class="field-row">
+        <label class="field-label">Estado de seguimiento</label>
+        <select id="fi-seguimiento-estado">
+          <option value="">— Sin seguimiento —</option>
+          <option value="En evaluación">🔍 En evaluación</option>
+          <option value="Interesado">✅ Interesado</option>
+          <option value="Visita agendada">📅 Visita agendada</option>
+          <option value="En negociación">🤝 En negociación</option>
+          <option value="No aplica">❌ No aplica</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Nota de seguimiento</label>
+        <textarea id="fi-seguimiento-nota" placeholder="¿Qué pasó? ¿Cuál es el próximo paso para este inmueble?…" style="min-height:55px;"></textarea>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Notas internas</label>
+        <textarea id="fi-notas" placeholder="Observaciones sobre este inmueble…" style="min-height:45px;"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-inmueble-sol')">Cancelar</button>
+      <button class="btn btn-primary" id="fi-save-btn" onclick="saveInmuebleSol()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     MODAL: DETALLE
+════════════════════════════════════════════ -->
+<div class="modal-bg" id="modal-detail">
+  <div class="modal" style="max-width:620px;">
+    <div class="modal-header">
+      <div class="modal-title">Detalle del registro</div>
+      <button class="modal-close" onclick="closeModal('modal-detail')">×</button>
+    </div>
+    <div class="modal-body" id="detail-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="deleteRecord()">🗑 Eliminar</button>
+      <button class="btn btn-ghost" onclick="editRecord()">✏️ Editar</button>
+      <button class="btn btn-primary" onclick="closeModal('modal-detail')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     MODAL: GRUPOS WA
+════════════════════════════════════════════ -->
+<div class="modal-bg" id="modal-groups">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">💬 Gestionar grupos de WhatsApp</div>
+      <button class="modal-close" onclick="closeModal('modal-groups')">×</button>
+    </div>
+    <div class="groups-config" id="groups-config-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="addGroup()">+ Agregar grupo</button>
+      <button class="btn btn-primary" onclick="saveGroups()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     MODAL: CONFIRMACIÓN ELIMINAR
+════════════════════════════════════════════ -->
+<div class="modal-bg" id="modal-confirm">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-header">
+      <div class="modal-title">🗑 Confirmar eliminación</div>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-msg" style="font-size:14px;color:var(--text-2);line-height:1.6;"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="confirmCancel()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmOk()">Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let records = [];
+let groups  = ["Grupo Asesores VLC","Grupo Caracas Pro","Red Inmobiliaria","Grupo Norte","Grupo Sur"];
+let currentView = 'hoy';
+let editingId   = null;
+let detailId    = null;
+let addingInmuebleToSolId = null;
+
+// ══════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════
+const today = () => new Date().toISOString().slice(0,10);
+const uid   = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
+const save  = () => {
+  guardarEnNube({ records, groups });
+};
+
+const tagColor = (val, map) => {
+  const c = map[val] || 'gray';
+  return `<span class="tag tag-${c}">${val || '—'}</span>`;
+};
+
+const TIPO_MAP   = {Enviado:'blue', Solicitud:'purple'};
+const RESP_MAP   = {Sí:'green', No:'red', Pendiente:'amber'};
+const FEED_MAP   = {'Interesado':'green','Solicita visita':'amber','No le interesa':'red','Precio alto':'red','Presupuesto no aplica':'red','Zona no aplica':'red','Lo tiene en cartera':'purple'};
+const ESTADO_MAP = {Pendiente:'amber', Activa:'blue', Cerrada:'gray'};
+const PASADO_MAP = {'Sí':'green', 'No':'amber'};
+const CIERRE_MAP = {'Negociación':'green', 'Desistió':'red'};
+
+// ══════════════════════════════════════════════
+//  VIEW ROUTING
+// ══════════════════════════════════════════════
+const VIEWS = {
+  hoy:         { label:'🗓️ Hoy',              tabs:['Tabla'] },
+  todos:       { label:'📋 Todos',             tabs:['Tabla','Por asesor'] },
+  enviados:    { label:'📤 Enviados',           tabs:['Tabla','Por asesor'] },
+  pipeline:    { label:'🔀 Pipeline difusión', tabs:['Tablero','Tabla'] },
+  solicitudes: { label:'📥 Solicitudes',       tabs:['Tablero','Tabla'] },
+  semanal:     { label:'📆 Vista semanal',     tabs:['Resumen'] },
+  mensual:     { label:'📅 Vista mensual',     tabs:['Resumen'] },
+};
+let activeTab = 0;
+
+function setView(v, e) {
+  currentView = v;
+  activeTab   = 0;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  if (e && e.currentTarget) e.currentTarget.classList.add('active');
+  document.getElementById('view-title').textContent = VIEWS[v].label;
+  renderTabs();
+  render();
+}
+
+function renderTabs() {
+  const tabs = VIEWS[currentView].tabs;
+  document.getElementById('view-tabs').innerHTML = tabs.map((t,i) =>
+    `<div class="view-tab${i===activeTab?' active':''}" onclick="setTab(${i})">${t}</div>`
+  ).join('');
+}
+
+function setTab(i) {
+  activeTab = i;
+  renderTabs();
+  render();
+}
+
+// ══════════════════════════════════════════════
+//  DATA FILTERS
+// ══════════════════════════════════════════════
+function filterRecords() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  let data = [...records];
+
+  if (currentView === 'hoy')
+    data = data.filter(r => r.fecha === today());
+  if (currentView === 'enviados')
+    data = data.filter(r => r.tipo === 'Enviado');
+  if (currentView === 'pipeline')
+    data = data.filter(r => r.tipo === 'Enviado');
+  if (currentView === 'solicitudes')
+    data = data.filter(r => r.tipo === 'Solicitud');
+
+  if (q) data = data.filter(r =>
+    (r.tipo==='Enviado'
+      ? [(r.inmueble||''), (r.asesor||''), (r.dest||'')]
+      : [(r.desc||''), (r.asesor||'')]
+    ).some(s => s.toLowerCase().includes(q))
+  );
+
+  return data;
+}
+
+// ══════════════════════════════════════════════
+//  KPIs
+// ══════════════════════════════════════════════
+function respCount(r, val) {
+  return (r.respuestas||[]).filter(x=>x.respondio===val).length;
+}
+function hasRespuestaSi(r) {
+  return (r.respuestas||[]).some(x=>x.respondio==='Sí');
+}
+function tieneRespuestaPendiente(r) {
+  const list = r.respuestas||[];
+  return !list.length || list.some(x=>x.respondio==='Pendiente');
+}
+
+function renderKPIs() {
+  const t = today();
+  document.getElementById('k1').textContent = records.filter(r=>r.tipo==='Enviado'&&r.fecha===t).length;
+  document.getElementById('k2').textContent = records.filter(r=>r.tipo==='Enviado'&&hasRespuestaSi(r)).length;
+  document.getElementById('k3').textContent = records.filter(r=>r.tipo==='Enviado'&&tieneRespuestaPendiente(r)).length;
+  document.getElementById('k5').textContent = records.reduce((a,r)=>r.tipo==='Enviado'?a+(r.respuestas||[]).length:a,0);
+  const solPend = records.filter(r=>r.tipo==='Solicitud'&&r.estado==='Pendiente').length;
+  document.getElementById('k4').textContent = solPend;
+  document.getElementById('k6').textContent = records.filter(r=>r.tipo==='Solicitud'&&r.estado==='Activa').length;
+  document.getElementById('k7').textContent = records.filter(r=>r.tipo==='Solicitud'&&r.estado==='Cerrada'&&r.cierreMotivo==='Negociación').length;
+  document.getElementById('k8').textContent = records.filter(r=>r.tipo==='Solicitud'&&r.estado==='Cerrada'&&r.cierreMotivo==='Desistió').length;
+  document.getElementById('badge-sol').textContent = solPend;
+}
+
+// ══════════════════════════════════════════════
+//  WEEK / MONTH HELPERS
+// ══════════════════════════════════════════════
+function isoWeekKey(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr+'T00:00:00');
+  const day = (d.getUTCDay()+6)%7; // Mon=0
+  d.setUTCDate(d.getUTCDate()-day+3);
+  const firstThursday = new Date(Date.UTC(d.getUTCFullYear(),0,4));
+  const week = 1 + Math.round(((d-firstThursday)/86400000 - 3 + ((firstThursday.getUTCDay()+6)%7))/7);
+  return `${d.getUTCFullYear()}-W${String(week).padStart(2,'0')}`;
+}
+function monthKey(dateStr) {
+  if (!dateStr) return null;
+  return dateStr.slice(0,7); // YYYY-MM
+}
+
+function renderResumen(area) {
+  const isWeek = currentView === 'semanal';
+  const keyFn   = isWeek ? isoWeekKey : monthKey;
+  const label   = isWeek ? 'Semana' : 'Mes';
+
+  const groups_map = {};
+  records.forEach(r => {
+    const k = keyFn(r.fecha);
+    if (!k) return;
+    if (!groups_map[k]) groups_map[k] = { enviados:[], solicitudes:[] };
+    if (r.tipo==='Enviado') groups_map[k].enviados.push(r);
+    else groups_map[k].solicitudes.push(r);
+  });
+
+  const keys = Object.keys(groups_map).sort().reverse();
+
+  if (!keys.length) {
+    area.innerHTML = `<div class="table-wrap"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">Sin datos todavía</div><div class="empty-sub">Agrega registros para ver el resumen ${isWeek?'semanal':'mensual'}</div></div></div>`;
+    return;
+  }
+
+  const rowsHTML = keys.map(k => {
+    const env = groups_map[k].enviados;
+    const sol = groups_map[k].solicitudes;
+
+    const totalEnv     = env.length;
+    const conResp      = env.filter(hasRespuestaSi).length;
+    const sinResp      = env.filter(tieneRespuestaPendiente).length;
+    const totalRespuestas = env.reduce((a,r)=>a+(r.respuestas||[]).length,0);
+    const enviadosSi   = env.reduce((a,r)=>a+respCount(r,'Sí'),0);
+
+    const totalSol     = sol.length;
+    const solPend      = sol.filter(r=>r.estado==='Pendiente').length;
+    const solActiva    = sol.filter(r=>r.estado==='Activa').length;
+    const solCerrNeg   = sol.filter(r=>r.estado==='Cerrada'&&r.cierreMotivo==='Negociación').length;
+    const solCerrDes   = sol.filter(r=>r.estado==='Cerrada'&&r.cierreMotivo==='Desistió').length;
+
+    return `
+      <div class="table-container" style="margin-bottom:14px;">
+        <div class="table-toolbar" style="background:var(--bg);">
+          <strong style="font-size:13px;">${isWeek?'📆':'📅'} ${k}</strong>
+        </div>
+        <div style="padding:14px;">
+          <div class="kpi-bar" style="grid-template-columns:repeat(4,1fr);padding:0;background:none;border:none;margin-bottom:14px;">
+            <div class="kpi kpi-blue"><div class="kpi-label">📤 Enviados</div><div class="kpi-num">${totalEnv}</div><div class="kpi-sub">Inmuebles enviados</div></div>
+            <div class="kpi kpi-green"><div class="kpi-label">✅ Con respuesta</div><div class="kpi-num">${conResp}</div><div class="kpi-sub">Al menos un Sí</div></div>
+            <div class="kpi kpi-amber"><div class="kpi-label">⏳ Sin respuesta</div><div class="kpi-num">${sinResp}</div><div class="kpi-sub">Con pendientes</div></div>
+            <div class="kpi kpi-purple"><div class="kpi-label">💬 Respuestas totales</div><div class="kpi-num">${totalRespuestas}</div><div class="kpi-sub">${enviadosSi} con envío = Sí</div></div>
+          </div>
+          <table>
+            <thead><tr><th>Inmueble</th><th>Asesor</th><th>Fecha</th><th>Respuestas</th></tr></thead>
+            <tbody>
+              ${env.length ? env.map(r=>`
+                <tr onclick="openDetail('${r.id}')">
+                  <td><strong>${r.inmueble||'—'}</strong></td>
+                  <td>${r.asesor||'—'}</td>
+                  <td>${r.fecha||'—'}</td>
+                  <td>${(r.respuestas||[]).length ? `<span class="tag tag-teal">${(r.respuestas||[]).length}</span>` : '<span class="tag tag-gray">0</span>'}</td>
+                </tr>`).join('') : `<tr><td colspan="4"><div class="empty-state" style="padding:18px;"><div class="empty-text" style="font-size:12px;">Sin inmuebles enviados</div></div></td></tr>`}
+            </tbody>
+          </table>
+
+          <div style="margin-top:14px;font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;">📥 Solicitudes — ${totalSol} (Pend: ${solPend} · Activas: ${solActiva} · Negoc: ${solCerrNeg} · Desistió: ${solCerrDes})</div>
+          <table style="margin-top:6px;">
+            <thead><tr><th>Solicitud</th><th>Asesor</th><th>Fecha</th><th>Estado</th></tr></thead>
+            <tbody>
+              ${sol.length ? sol.map(r=>`
+                <tr onclick="openDetail('${r.id}')">
+                  <td>${r.desc?(r.desc.slice(0,60)+(r.desc.length>60?'…':'')):'—'}</td>
+                  <td>${r.asesor||'—'}</td>
+                  <td>${r.fecha||'—'}</td>
+                  <td>${tagColor(r.estado||'Pendiente', ESTADO_MAP)}</td>
+                </tr>`).join('') : `<tr><td colspan="4"><div class="empty-state" style="padding:18px;"><div class="empty-text" style="font-size:12px;">Sin solicitudes</div></div></td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  }).join('');
+
+  area.innerHTML = `<div class="table-wrap">${rowsHTML}</div>`;
+}
+
+// ══════════════════════════════════════════════
+//  RENDER MAIN
+// ══════════════════════════════════════════════
+function render() {
+  renderKPIs();
+  const data = filterRecords();
+  const area = document.getElementById('content-area');
+  const tab  = VIEWS[currentView].tabs[activeTab];
+
+  if (tab === 'Tablero') {
+    renderBoard(data, area);
+  } else if (tab === 'Por asesor') {
+    renderGrouped(data, area);
+  } else if (tab === 'Resumen') {
+    renderResumen(area);
+  } else {
+    renderTable(data, area);
+  }
+}
+
+// ══════════════════════════════════════════════
+//  TABLE VIEW
+// ══════════════════════════════════════════════
+function renderTable(data, area) {
+  const isSol = currentView === 'solicitudes';
+  const isEnv = currentView === 'enviados' || currentView === 'pipeline';
+
+  const cols    = isSol
+    ? ['desc','asesor','fecha','estado','cierreMotivo','inmueblesSol']
+    : ['inmueble','asesor','dest','grupos','respuestas','fecha'];
+
+  const headers = {
+    inmueble:'Inmueble', asesor:'Asesor', dest:'Destinatario', grupos:'Grupos WA',
+    respuestas:'Respuestas', fecha:'Fecha',
+    desc:'Solicitud', estado:'Estado', cierreMotivo:'Motivo cierre', inmueblesSol:'Opciones recibidas'
+  };
+
+  const rows = data.length ? data.map(r => `
+    <tr onclick="openDetail('${r.id}')">
+      ${cols.map(c => `<td>${cellVal(r,c)}</td>`).join('')}
+    </tr>
+  `).join('') : `<tr><td colspan="${cols.length}">
+    <div class="empty-state">
+      <div class="empty-icon">📭</div>
+      <div class="empty-text">Sin registros en esta vista</div>
+      <div class="empty-sub">Usa los botones del panel izquierdo para agregar</div>
+    </div>
+  </td></tr>`;
+
+  area.innerHTML = `
+    <div class="table-wrap">
+      <div class="table-container">
+        <div class="table-toolbar">
+          <span class="toolbar-text">${data.length} registro${data.length!==1?'s':''}</span>
+        </div>
+        <table>
+          <thead><tr>${cols.map(c=>`<th>${headers[c]}</th>`).join('')}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function cellVal(r, col) {
+  switch(col) {
+    case 'inmueble':     return `<strong>${r.inmueble||'—'}</strong>`;
+    case 'asesor':       return r.asesor||'—';
+    case 'dest':         return r.dest||'—';
+    case 'grupos':       return r.grupos&&r.grupos.length ? `<span class="tag tag-teal">${r.grupos.length} grupo${r.grupos.length!==1?'s':''}</span>` : '—';
+    case 'respuestas': {
+      const list = r.respuestas||[];
+      if (!list.length) return '<span class="tag tag-amber">Pendiente</span>';
+      const si = list.filter(x=>x.respondio==='Sí').length;
+      const no = list.filter(x=>x.respondio==='No').length;
+      const pend = list.filter(x=>x.respondio==='Pendiente').length;
+      const parts = [];
+      if (si) parts.push(`<span class="tag tag-green">${si} Sí</span>`);
+      if (no) parts.push(`<span class="tag tag-red">${no} No</span>`);
+      if (pend) parts.push(`<span class="tag tag-amber">${pend} Pend.</span>`);
+      return `<div class="tags-wrap">${parts.join('')}</div>`;
+    }
+    case 'fecha':        return r.fecha||'—';
+    case 'desc':         return r.desc ? `<span style="color:var(--text-2);font-size:12px;">${r.desc.slice(0,70)}${r.desc.length>70?'…':''}</span>` : '—';
+    case 'estado':       return tagColor(r.estado||'Pendiente', ESTADO_MAP);
+    case 'cierreMotivo': return r.cierreMotivo ? tagColor(r.cierreMotivo, CIERRE_MAP) : '—';
+    case 'inmueblesSol': {
+      const cnt = (r.inmueblesSol||[]).length;
+      return cnt ? `<span class="tag tag-teal">${cnt} opción${cnt!==1?'es':''}</span>` : '<span class="tag tag-gray">Sin opciones</span>';
+    }
+    default: return '—';
+  }
+}
+
+// ══════════════════════════════════════════════
+//  BOARD VIEW
+// ══════════════════════════════════════════════
+function renderBoard(data, area) {
+  const isPipeline = currentView === 'pipeline';
+  const colsDef = isPipeline
+    ? ['','Interesado','Solicita visita','No le interesa','Precio alto','Lo tiene en cartera']
+    : ['Pendiente','Activa','Cerrada'];
+
+  const groupBy = isPipeline ? 'feedback' : 'estado';
+
+  const colLabels = isPipeline
+    ? {'':'Sin respuesta','Interesado':'Interesado','Solicita visita':'Solicita visita',
+       'No le interesa':'No le interesa','Precio alto':'Precio alto','Lo tiene en cartera':'En cartera'}
+    : {Pendiente:'⏳ Pendiente', Activa:'🔵 Activa', Cerrada:'🔒 Cerrada'};
+
+  const grouped = {};
+  colsDef.forEach(c => grouped[c] = []);
+  data.forEach(r => {
+    let key;
+    if (isPipeline) {
+      const list = r.respuestas||[];
+      const withFeedback = list.find(x=>x.feedback);
+      key = withFeedback ? withFeedback.feedback : '';
+    } else {
+      key = r.estado||'';
+    }
+    if (grouped[key] !== undefined) grouped[key].push(r);
+    else { grouped[''] = grouped['']||[]; grouped[''].push(r); }
+  });
+
+  const cols = colsDef.map(k => {
+    const items = grouped[k]||[];
+    const cards = items.map(r => `
+      <div class="board-card" onclick="openDetail('${r.id}')">
+        <div class="board-card-title">${r.tipo==='Enviado'?(r.inmueble||'—'):(r.desc?r.desc.slice(0,50)+'…':'—')}</div>
+        <div class="board-card-sub">${r.asesor||r.dest||'—'}</div>
+        ${r.fecha?`<div style="margin-top:5px;font-size:10px;color:var(--text-3)">${r.fecha}</div>`:''}
+      </div>
+    `).join('');
+    return `
+      <div class="board-col">
+        <div class="board-col-head">
+          <span class="board-col-title">${colLabels[k]||k}</span>
+          <span class="board-col-count">${items.length}</span>
+        </div>
+        <div class="board-cards">${cards||'<div style="padding:8px;font-size:12px;color:var(--text-3);text-align:center">Vacío</div>'}</div>
+      </div>`;
+  }).join('');
+
+  area.innerHTML = `<div class="board-wrap"><div class="board">${cols}</div></div>`;
+}
+
+// ══════════════════════════════════════════════
+//  GROUPED TABLE (por asesor)
+// ══════════════════════════════════════════════
+function renderGrouped(data, area) {
+  const groupField = currentView==='solicitudes' ? 'asesor' : 'dest';
+  const groups_map = {};
+  data.forEach(r => {
+    const k = r[groupField]||'(sin especificar)';
+    if (!groups_map[k]) groups_map[k] = [];
+    groups_map[k].push(r);
+  });
+
+  if (!Object.keys(groups_map).length) {
+    area.innerHTML = `<div class="table-wrap"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">Sin datos</div></div></div>`;
+    return;
+  }
+
+  const html = Object.entries(groups_map).map(([key, rows]) => `
+    <div class="table-container" style="margin-bottom:14px;">
+      <div class="table-toolbar" style="background:var(--bg);">
+        <strong style="font-size:13px;">👤 ${key}</strong>
+        <span class="toolbar-text" style="margin-left:8px;">${rows.length} registro${rows.length!==1?'s':''}</span>
+      </div>
+      <table>
+        <thead><tr>
+          <th>Inmueble / Solicitud</th><th>Fecha</th><th>Estado / Respuestas</th>
+        </tr></thead>
+        <tbody>
+          ${rows.map(r=>`<tr onclick="openDetail('${r.id}')">
+            <td><strong>${r.tipo==='Enviado'?(r.inmueble||'—'):(r.desc?r.desc.slice(0,60)+'…':'—')}</strong></td>
+            <td>${r.fecha||'—'}</td>
+            <td>${r.tipo==='Enviado'?cellVal(r,'respuestas'):tagColor(r.estado||'Pendiente',ESTADO_MAP)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  `).join('');
+
+  area.innerHTML = `<div class="table-wrap">${html}</div>`;
+}
+
+// ══════════════════════════════════════════════
+//  DETAIL MODAL
+// ══════════════════════════════════════════════
+function openDetail(id) {
+  const r = records.find(x=>x.id===id);
+  if (!r) return;
+  detailId = id;
+
+  if (r.tipo === 'Enviado') {
+    renderDetailEnviado(r);
+  } else {
+    renderDetailSolicitud(r);
+  }
+
+  document.getElementById('modal-detail').classList.add('open');
+}
+
+function renderDetailEnviado(r) {
+  const grupo_tags = (r.grupos||[]).map(g=>`<span class="tag tag-teal">💬 ${g}</span>`).join(' ');
+
+  // Seguimiento items
+  const seguimientoList = (r.seguimientos||[]);
+  const seguimientoHTML = seguimientoList.length ? seguimientoList.map((s,i)=>`
+    <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border-light);">
+      <div style="font-size:18px;line-height:1;margin-top:2px;">🔄</div>
+      <div style="flex:1;">
+        <div style="font-size:12px;font-weight:500;color:var(--text);">${s.estado||'—'}</div>
+        ${s.notas?`<div style="font-size:12px;color:var(--text-2);margin-top:2px;">${s.notas}</div>`:''}
+        <div style="font-size:11px;color:var(--text-3);margin-top:2px;">${s.fecha||''}</div>
+      </div>
+    </div>
+  `).join('') : `<div style="font-size:12px;color:var(--text-3);padding:8px 0;">Sin seguimientos registrados aún.</div>`;
+
+  // Lista de respuestas (escala 2)
+  const respuestas = r.respuestas||[];
+  const respuestasHTML = respuestas.length ? respuestas.map((resp,i) => {
+    const respClass = resp.respondio==='Sí' ? 'respondio-si' : resp.respondio==='No' ? 'respondio-no' : '';
+    const inmoBadge = resp.esInmo==='Sí' && resp.inmobiliaria
+      ? `<span class="inmo-badge">🏢 ${resp.inmobiliaria}</span>`
+      : (resp.esInmo==='Sí' ? `<span class="inmo-badge">🏢 Inmobiliaria</span>` : '');
+    return `
+    <div class="seguimiento-box ${respClass}" style="margin-bottom:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;">
+        <span style="font-size:13px;font-weight:500;">👤 ${resp.asesor||'—'}</span>
+        <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
+          ${inmoBadge}
+          ${tagColor(resp.respondio||'Pendiente', RESP_MAP)}
+        </div>
+      </div>
+      ${resp.feedback?`<div style="margin-top:4px;font-size:12px;color:var(--text-2);">Feedback: ${tagColor(resp.feedback,FEED_MAP)}</div>`:''}
+      ${resp.notas?`<div style="margin-top:6px;font-size:12px;color:var(--text-2);line-height:1.4;">${resp.notas}</div>`:''}
+      <div style="margin-top:8px;display:flex;gap:6px;">
+        <button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="openRespuesta('${r.id}',${i})">✏️ Editar</button>
+        <button class="btn btn-danger" style="font-size:11px;padding:3px 10px;" onclick="deleteRespuesta('${r.id}',${i})">🗑 Eliminar</button>
+      </div>
+    </div>`;
+  }).join('') : `<div style="font-size:13px;color:var(--text-2);margin-bottom:10px;">⏳ Aún sin respuestas registradas.</div>`;
+
+  // Escala 3: seguimiento — solo mostrar si al menos una respuesta es "Sí"
+  const seguimientoSection = respuestas.some(x=>x.respondio==='Sí') ? `
+    <div class="detail-section">
+      <div class="detail-section-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Seguimiento de respuesta</span>
+        <button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="openSeguimiento('${r.id}')">+ Agregar</button>
+      </div>
+      <div style="margin-top:4px;">${seguimientoHTML}</div>
+    </div>
+  ` : '';
+
+  document.getElementById('detail-body').innerHTML = `
+    <div class="detail-meta">
+      ${tagColor('Enviado', TIPO_MAP)}
+      <span style="font-size:12px;color:var(--text-3)">${r.fecha||''}</span>
+    </div>
+    <div class="detail-title">${r.inmueble||'—'}</div>
+
+    <div class="detail-section" style="margin-top:14px;">
+      <div class="detail-section-title">Asesor del inmueble</div>
+      <div class="detail-field">
+        <span class="detail-field-name">👤 Asesor captador</span>
+        <span class="detail-field-value">${r.asesor||'—'}</span>
+      </div>
+    </div>
+
+    ${(r.grupos&&r.grupos.length) ? `
+    <div class="detail-section">
+      <div class="detail-section-title">Enviado a</div>
+      <div class="detail-field"><span class="detail-field-name">💬 Grupos WA</span><span class="detail-field-value"><div class="tags-wrap">${grupo_tags}</div></span></div>
+    </div>`:''}
+
+    <div class="detail-section">
+      <div class="detail-section-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Respuestas (${respuestas.length})</span>
+        <button class="btn btn-teal" style="font-size:11px;padding:3px 10px;" onclick="openRespuesta('${r.id}')">+ Agregar respuesta</button>
+      </div>
+      <div style="margin-top:4px;">${respuestasHTML}</div>
+    </div>
+
+    ${seguimientoSection}
+  `;
+}
+
+function renderDetailSolicitud(r) {
+  const inmuebles = r.inmueblesSol || [];
+
+  const inmueblesHTML = inmuebles.length ? `
+    <div class="sub-table-wrap">
+      <div class="sub-table-head">
+        <span class="sub-table-title">🏠 Inmuebles recibidos (${inmuebles.length})</span>
+        <button class="btn btn-teal" style="padding:4px 10px;font-size:12px;" onclick="openAddInmuebleSol('${r.id}')">+ Agregar</button>
+      </div>
+      ${inmuebles.map((m,i) => {
+        const segMap = {
+          'En evaluación':'seg-badge-eval','Interesado':'seg-badge-inter',
+          'Visita agendada':'seg-badge-visita','En negociación':'seg-badge-negoc','No aplica':'seg-badge-no'
+        };
+        const segBadge = m.seguimientoEstado
+          ? `<span class="seg-badge ${segMap[m.seguimientoEstado]||''}">${m.seguimientoEstado}</span>`
+          : '';
+        return `
+        <div style="padding:10px 12px;border-bottom:1px solid var(--border-light);">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px;">
+            <div style="font-size:12px;font-weight:500;flex:1;">${m.nombre||'—'}</div>
+            <div style="display:flex;gap:4px;align-items:center;flex-shrink:0;">
+              ${tagColor(m.pasado||'No', PASADO_MAP)}
+              ${m.feedback?tagColor(m.feedback,FEED_MAP):''}
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Enviado por: ${m.quien||'—'}</div>
+          ${segBadge ? `<div style="margin-bottom:4px;">${segBadge}</div>` : ''}
+          ${m.feedbackDetalle?`<div style="font-size:12px;color:var(--text-2);margin-top:4px;padding:6px 8px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border-light);">💬 ${m.feedbackDetalle}</div>`:''}
+          ${m.seguimientoNota?`<div style="font-size:12px;color:var(--teal);margin-top:4px;padding:5px 8px;background:var(--teal-bg);border-radius:var(--radius-sm);border:1px solid #99F6E4;">🔄 ${m.seguimientoNota}</div>`:''}
+          ${m.notas?`<div style="font-size:11px;color:var(--text-3);margin-top:3px;">📝 ${m.notas}</div>`:''}
+          <div style="display:flex;gap:6px;margin-top:7px;">
+            <button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="openAddInmuebleSol('${r.id}',${i})">✏️ Editar</button>
+            <button class="btn btn-danger" style="font-size:11px;padding:3px 10px;" onclick="deleteInmuebleSol('${r.id}',${i})">🗑 Eliminar</button>
+          </div>
+        </div>`
+      }).join('')}
+    </div>
+  ` : `
+    <div class="sub-table-wrap" style="padding:12px;text-align:center;">
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:8px;">Ningún inmueble registrado para esta solicitud</div>
+      <button class="btn btn-teal" style="font-size:12px;" onclick="openAddInmuebleSol('${r.id}')">+ Agregar primer inmueble</button>
+    </div>
+  `;
+
+  // Quick estado change
+  const estadoActual = r.estado || 'Pendiente';
+  const quickEstadoHTML = `
+    <div style="margin-top:8px;">
+      <div style="font-size:11px;color:var(--text-3);margin-bottom:6px;">Cambiar estado:</div>
+      <div class="status-quick">
+        <button class="status-btn ${estadoActual==='Pendiente'?'active-pend':''}"
+          onclick="quickChangeEstado('${r.id}','Pendiente')">⏳ Pendiente</button>
+        <button class="status-btn ${estadoActual==='Activa'?'active-activa':''}"
+          onclick="quickChangeEstado('${r.id}','Activa')">🔵 Activa</button>
+        <button class="status-btn ${estadoActual==='Cerrada'?'active-cerrada':''}"
+          onclick="quickChangeEstado('${r.id}','Cerrada')">🔒 Cerrar</button>
+      </div>
+      <div id="quick-cierre-wrap-${r.id}" style="display:none;margin-top:8px;" class="cierre-motivo-wrap">
+        <div style="font-size:12px;font-weight:500;margin-bottom:6px;">¿Por qué se cerró?</div>
+        <select id="quick-cierre-motivo-${r.id}" style="margin-bottom:8px;">
+          <option value="Negociación">🤝 Se hizo negociación / venta</option>
+          <option value="Desistió">❌ El cliente desistió</option>
+        </select>
+        <button class="btn btn-primary" style="font-size:12px;padding:5px 14px;width:100%;"
+          onclick="quickConfirmCierre('${r.id}')">Confirmar cierre</button>
+      </div>
+      ${estadoActual==='Cerrada'&&r.cierreMotivo?`
+        <div style="margin-top:6px;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2);">
+          Motivo: ${tagColor(r.cierreMotivo, CIERRE_MAP)}
+        </div>`:''}
+    </div>
+  `;
+
+  document.getElementById('detail-body').innerHTML = `
+    <div class="detail-meta">
+      ${tagColor('Solicitud', TIPO_MAP)}
+      ${tagColor(estadoActual, ESTADO_MAP)}
+      ${r.cierreMotivo?tagColor(r.cierreMotivo,CIERRE_MAP):''}
+      <span style="font-size:12px;color:var(--text-3)">${r.fecha||''}</span>
+    </div>
+    <div class="detail-title" style="font-size:15px;margin-bottom:10px;">${r.desc ? (r.desc.length>80?r.desc.slice(0,80)+'…':r.desc) : '—'}</div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Estado de la solicitud</div>
+      ${quickEstadoHTML}
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Especificaciones</div>
+      <div class="detail-field">
+        <span class="detail-field-name">📋 Descripción</span>
+        <span class="detail-field-value" style="white-space:pre-wrap;">${r.desc||'—'}</span>
+      </div>
+      <div class="detail-field">
+        <span class="detail-field-name">👤 Asesor (tuyo)</span>
+        <span class="detail-field-value">${r.asesor||'—'}</span>
+      </div>
+      ${r.notas?`<div class="detail-field"><span class="detail-field-name">📝 Notas</span><span class="detail-field-value">${r.notas}</span></div>`:''}
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Inmuebles recibidos en respuesta</div>
+      ${inmueblesHTML}
+    </div>
+  `;
+}
+
+let editingInmuebleIdx = null;
+
+function openAddInmuebleSol(id, idx) {
+  addingInmuebleToSolId = id;
+  editingInmuebleIdx = (idx !== undefined && idx !== null) ? idx : null;
+  const r = records.find(x=>x.id===id);
+  const m = (editingInmuebleIdx !== null) ? (r?.inmueblesSol||[])[editingInmuebleIdx] : null;
+
+  document.getElementById('modal-inmueble-sol-title').textContent = m ? '✏️ Editar inmueble recibido' : '🏠 Agregar inmueble recibido';
+  document.getElementById('fi-save-btn').textContent = m ? '💾 Guardar cambios' : 'Agregar';
+  document.getElementById('fi-nombre').value            = m?.nombre||'';
+  document.getElementById('fi-quien').value             = m?.quien||'';
+  document.getElementById('fi-pasado').value            = m?.pasado||'No';
+  document.getElementById('fi-feedback').value          = m?.feedback||'';
+  document.getElementById('fi-feedback-detalle').value  = m?.feedbackDetalle||'';
+  document.getElementById('fi-seguimiento-estado').value = m?.seguimientoEstado||'';
+  document.getElementById('fi-seguimiento-nota').value  = m?.seguimientoNota||'';
+  document.getElementById('fi-notas').value             = m?.notas||'';
+  closeModal('modal-detail');
+  document.getElementById('modal-inmueble-sol').classList.add('open');
+}
+
+function saveInmuebleSol() {
+  const nombre = document.getElementById('fi-nombre').value.trim();
+  if (!nombre) { alert('El nombre del inmueble es obligatorio.'); return; }
+
+  const r = records.find(x=>x.id===addingInmuebleToSolId);
+  if (!r) return;
+  if (!r.inmueblesSol) r.inmueblesSol = [];
+
+  const inmuebleData = {
+    nombre,
+    quien:             document.getElementById('fi-quien').value.trim(),
+    pasado:            document.getElementById('fi-pasado').value,
+    feedback:          document.getElementById('fi-feedback').value,
+    feedbackDetalle:   document.getElementById('fi-feedback-detalle').value.trim(),
+    seguimientoEstado: document.getElementById('fi-seguimiento-estado').value,
+    seguimientoNota:   document.getElementById('fi-seguimiento-nota').value.trim(),
+    notas:             document.getElementById('fi-notas').value.trim(),
+  };
+
+  if (editingInmuebleIdx !== null) {
+    r.inmueblesSol[editingInmuebleIdx] = inmuebleData;
+  } else {
+    r.inmueblesSol.push(inmuebleData);
+  }
+
+  save();
+  closeModal('modal-inmueble-sol');
+  openDetail(addingInmuebleToSolId);
+}
+
+// ══════════════════════════════════════════════
+//  DELETE INMUEBLE DE SOLICITUD
+// ══════════════════════════════════════════════
+function deleteInmuebleSol(id, idx) {
+  showConfirm('¿Eliminar este inmueble de la solicitud?', () => {
+    const r = records.find(x=>x.id===id);
+    if (!r || !r.inmueblesSol) return;
+    r.inmueblesSol.splice(idx, 1);
+    save();
+    openDetail(id);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  TOGGLE CIERRE MOTIVO
+// ══════════════════════════════════════════════
+function toggleFsEstado() {
+  const v = document.getElementById('fs-estado').value;
+  document.getElementById('fs-cierre-wrap').style.display = v === 'Cerrada' ? 'block' : 'none';
+}
+
+// ══════════════════════════════════════════════
+//  DELETE RESPUESTA
+// ══════════════════════════════════════════════
+function deleteRespuesta(id, idx) {
+  showConfirm('¿Eliminar esta respuesta?', () => {
+    const r = records.find(x=>x.id===id);
+    if (!r || !r.respuestas) return;
+    r.respuestas.splice(idx, 1);
+    save();
+    openDetail(id);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  QUICK STATUS CHANGE (solicitud desde detalle)
+// ══════════════════════════════════════════════
+function quickChangeEstado(id, estado) {
+  if (estado === 'Cerrada') {
+    // Show inline motivo prompt
+    document.getElementById('quick-cierre-wrap-'+id).style.display = 'block';
+    return;
+  }
+  const r = records.find(x=>x.id===id);
+  if (!r) return;
+  r.estado = estado;
+  r.cierreMotivo = '';
+  save();
+  openDetail(id);
+}
+
+function quickConfirmCierre(id) {
+  const r = records.find(x=>x.id===id);
+  if (!r) return;
+  r.estado = 'Cerrada';
+  r.cierreMotivo = document.getElementById('quick-cierre-motivo-'+id).value;
+  save();
+  openDetail(id);
+}
+
+// ══════════════════════════════════════════════
+//  SAVE ENVIADO
+// ══════════════════════════════════════════════
+function saveEnviado() {
+  const inmueble = document.getElementById('fe-inmueble').value.trim();
+  if (!inmueble) { alert('El nombre del inmueble es obligatorio.'); return; }
+
+  const selectedGrps = [...document.querySelectorAll('#fe-groups-picker .group-chip.selected')].map(el=>el.textContent.trim().replace('💬 ',''));
+
+  const rec = {
+    id:        editingId || uid(),
+    tipo:      'Enviado',
+    inmueble,
+    fecha:     document.getElementById('fe-fecha').value,
+    asesor:    document.getElementById('fe-asesor').value.trim(),
+    dest:      document.getElementById('fe-dest').value.trim(),
+    grupos:    selectedGrps,
+    respondio: document.getElementById('fe-respondio').value,
+    feedback:  document.getElementById('fe-feedback').value,
+    notas:     document.getElementById('fe-notas').value.trim(),
+  };
+
+  if (editingId) {
+    records = records.map(r => r.id===editingId ? rec : r);
+  } else {
+    records.unshift(rec);
+  }
+
+  save();
+  closeModal('modal-enviado');
+  render();
+}
+
+// ══════════════════════════════════════════════
+//  SAVE SOLICITUD
+// ══════════════════════════════════════════════
+function saveSolicitud() {
+  const desc   = document.getElementById('fs-desc').value.trim();
+  const asesor = document.getElementById('fs-asesor').value.trim();
+  if (!desc)   { alert('La descripción de la solicitud es obligatoria.'); return; }
+  if (!asesor) { alert('El nombre del asesor es obligatorio.'); return; }
+
+  const existing = editingId ? records.find(r=>r.id===editingId) : null;
+  const estado = document.getElementById('fs-estado').value;
+
+  const rec = {
+    id:           editingId || uid(),
+    tipo:         'Solicitud',
+    desc,
+    asesor,
+    fecha:        document.getElementById('fs-fecha').value,
+    estado,
+    cierreMotivo: estado === 'Cerrada' ? document.getElementById('fs-cierre-motivo').value : '',
+    notas:        document.getElementById('fs-notas').value.trim(),
+    inmueblesSol: existing ? (existing.inmueblesSol||[]) : [],
+  };
+
+  if (editingId) {
+    records = records.map(r => r.id===editingId ? rec : r);
+  } else {
+    records.unshift(rec);
+  }
+
+  save();
+  closeModal('modal-solicitud');
+  render();
+}
+
+// ══════════════════════════════════════════════
+//  OPEN NEW / EDIT
+// ══════════════════════════════════════════════
+function openNew(mode, data) {
+  editingId = data ? data.id : null;
+  const isEdit = !!data;
+
+  if (mode === 'enviado') {
+    document.getElementById('modal-enviado-title').textContent = isEdit ? '✏️ Editar inmueble enviado' : '📤 Registrar inmueble enviado';
+    document.getElementById('fe-inmueble').value  = data?.inmueble||'';
+    document.getElementById('fe-fecha').value     = data?.fecha||today();
+    document.getElementById('fe-asesor').value    = data?.asesor||'';
+
+    // Groups picker
+    const selGrps = data?.grupos||[];
+    document.getElementById('fe-groups-picker').innerHTML = groups.map(g => `
+      <div class="group-chip${selGrps.includes(g)?' selected':''}" onclick="this.classList.toggle('selected')">
+        💬 ${g}
+      </div>
+    `).join('');
+
+    document.getElementById('modal-enviado').classList.add('open');
+
+  } else {
+    document.getElementById('modal-sol-title').textContent = isEdit ? '✏️ Editar solicitud' : '📥 Nueva solicitud recibida';
+    document.getElementById('fs-desc').value          = data?.desc||'';
+    document.getElementById('fs-fecha').value         = data?.fecha||today();
+    document.getElementById('fs-asesor').value        = data?.asesor||'';
+    document.getElementById('fs-estado').value        = data?.estado||'Pendiente';
+    document.getElementById('fs-cierre-motivo').value = data?.cierreMotivo||'Negociación';
+    document.getElementById('fs-notas').value         = data?.notas||'';
+    // Dynamic save button
+    const saveBtn = document.getElementById('modal-sol-save-btn');
+    const preview = document.getElementById('modal-sol-estado-preview');
+    if (isEdit) {
+      const estadoActual = data?.estado || 'Pendiente';
+      const estadoLabels = {Pendiente:'⏳ Pendiente', Activa:'🔵 Activa', Cerrada:'🔒 Cerrada'};
+      saveBtn.textContent = '💾 Guardar cambios';
+      preview.style.display = 'block';
+      preview.innerHTML = `Estado actual: <strong>${estadoLabels[estadoActual]||estadoActual}</strong> — los cambios se aplicarán al guardar`;
+    } else {
+      saveBtn.textContent = 'Guardar solicitud';
+      preview.style.display = 'none';
+    }
+    toggleFsEstado();
+    document.getElementById('modal-solicitud').classList.add('open');
+  }
+}
+
+function editRecord() {
+  closeModal('modal-detail');
+  const r = records.find(x=>x.id===detailId);
+  if (!r) return;
+  editingId = detailId;
+  openNew(r.tipo==='Enviado' ? 'enviado' : 'solicitud', r);
+}
+
+function deleteRecord() {
+  showConfirm('¿Seguro que deseas eliminar este registro? Esta acción no se puede deshacer.', () => {
+    records = records.filter(x=>x.id!==detailId);
+    save();
+    closeModal('modal-detail');
+    render();
+  });
+}
+
+// ══════════════════════════════════════════════
+//  REGISTRAR RESPUESTA (escala 2)
+// ══════════════════════════════════════════════
+let respuestaTargetId = null;
+let respuestaEditIdx  = null;
+
+function openRespuesta(id, idx) {
+  respuestaTargetId = id;
+  respuestaEditIdx  = (idx !== undefined) ? idx : null;
+  const r = records.find(x=>x.id===id);
+  const resp = (idx !== undefined) ? (r?.respuestas||[])[idx] : null;
+  document.getElementById('mr-asesor').value      = resp?.asesor||'';
+  document.getElementById('mr-es-inmo').value     = resp?.esInmo||'No';
+  document.getElementById('mr-inmobiliaria').value = resp?.inmobiliaria||'';
+  document.getElementById('mr-respondio').value   = resp?.respondio||'Pendiente';
+  document.getElementById('mr-feedback').value    = resp?.feedback||'';
+  document.getElementById('mr-notas').value       = resp?.notas||'';
+  toggleMrExtra();
+  toggleMrInmo();
+  closeModal('modal-detail');
+  document.getElementById('modal-respuesta').classList.add('open');
+}
+
+function toggleMrInmo() {
+  const v = document.getElementById('mr-es-inmo').value;
+  document.getElementById('mr-inmo-wrap').style.display = v==='Sí' ? 'block' : 'none';
+}
+
+function toggleMrExtra() {
+  const v = document.getElementById('mr-respondio').value;
+  document.getElementById('mr-extra').style.display = v==='Sí' ? 'block' : 'none';
+}
+
+function closeRespuesta() {
+  closeModal('modal-respuesta');
+  if (respuestaTargetId) openDetail(respuestaTargetId);
+}
+
+function saveRespuesta() {
+  const r = records.find(x=>x.id===respuestaTargetId);
+  if (!r) return;
+  const asesor = document.getElementById('mr-asesor').value.trim();
+  if (!asesor) { alert('El nombre del asesor es obligatorio.'); return; }
+  const newResp = {
+    asesor,
+    esInmo:       document.getElementById('mr-es-inmo').value,
+    inmobiliaria: document.getElementById('mr-inmobiliaria').value.trim(),
+    respondio:    document.getElementById('mr-respondio').value,
+    feedback:     document.getElementById('mr-feedback').value,
+    notas:        document.getElementById('mr-notas').value.trim(),
+  };
+  if (!r.respuestas) r.respuestas = [];
+  if (respuestaEditIdx !== null) {
+    r.respuestas[respuestaEditIdx] = newResp;
+  } else {
+    r.respuestas.push(newResp);
+  }
+  save();
+  closeModal('modal-respuesta');
+  openDetail(respuestaTargetId);
+}
+
+// ══════════════════════════════════════════════
+//  SEGUIMIENTO DE RESPUESTA (escala 3)
+// ══════════════════════════════════════════════
+let seguimientoTargetId = null;
+
+function openSeguimiento(id) {
+  seguimientoTargetId = id;
+  document.getElementById('ms-fecha').value  = today();
+  document.getElementById('ms-estado').value = 'En negociación';
+  document.getElementById('ms-notas').value  = '';
+  closeModal('modal-detail');
+  document.getElementById('modal-seguimiento').classList.add('open');
+}
+
+function closeSeguimiento() {
+  closeModal('modal-seguimiento');
+  if (seguimientoTargetId) openDetail(seguimientoTargetId);
+}
+
+function saveSeguimiento() {
+  const r = records.find(x=>x.id===seguimientoTargetId);
+  if (!r) return;
+  if (!r.seguimientos) r.seguimientos = [];
+  r.seguimientos.unshift({
+    fecha:  document.getElementById('ms-fecha').value,
+    estado: document.getElementById('ms-estado').value,
+    notas:  document.getElementById('ms-notas').value.trim(),
+  });
+  save();
+  closeModal('modal-seguimiento');
+  openDetail(seguimientoTargetId);
+}
+
+// ══════════════════════════════════════════════
+//  GROUPS CONFIG
+// ══════════════════════════════════════════════
+let tempGroups = [];
+function openGroupsConfig() {
+  tempGroups = [...groups];
+  renderGroupsConfig();
+  document.getElementById('modal-groups').classList.add('open');
+}
+
+function renderGroupsConfig() {
+  document.getElementById('groups-config-body').innerHTML = `
+    <p style="font-size:13px;color:var(--text-2);margin-bottom:14px;padding:0 0 0 0;">Agrega o edita los nombres de tus grupos de WhatsApp.</p>
+    ${tempGroups.map((g,i)=>`
+      <div class="group-config-item">
+        <input type="text" class="group-name-input" value="${g}" onchange="tempGroups[${i}]=this.value">
+        <button class="btn-icon" onclick="removeGroup(${i})" title="Eliminar">🗑</button>
+      </div>
+    `).join('')}
+  `;
+}
+
+function addGroup() {
+  tempGroups.push('Nuevo grupo');
+  renderGroupsConfig();
+}
+
+function removeGroup(i) {
+  tempGroups.splice(i,1);
+  renderGroupsConfig();
+}
+
+function saveGroups() {
+  groups = tempGroups.map(g=>g.trim()).filter(Boolean);
+  save();
+  closeModal('modal-groups');
+}
+
+// ══════════════════════════════════════════════
+//  CONFIRM MODAL (reemplaza window.confirm)
+// ══════════════════════════════════════════════
+let _confirmCallback = null;
+
+function showConfirm(msg, onOk) {
+  _confirmCallback = onOk;
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('modal-confirm').classList.add('open');
+}
+
+function confirmOk() {
+  document.getElementById('modal-confirm').classList.remove('open');
+  if (_confirmCallback) { _confirmCallback(); _confirmCallback = null; }
+}
+
+function confirmCancel() {
+  document.getElementById('modal-confirm').classList.remove('open');
+  _confirmCallback = null;
+}
+
+// ══════════════════════════════════════════════
+//  MODAL UTILS
+// ══════════════════════════════════════════════
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  if (id==='modal-enviado' || id==='modal-solicitud') editingId = null;
+}
+
+document.querySelectorAll('.modal-bg').forEach(m => {
+  m.addEventListener('click', e => {
+    if (e.target !== m) return;
+    const id = m.id;
+    m.classList.remove('open');
+    if (id === 'modal-respuesta' && respuestaTargetId)   openDetail(respuestaTargetId);
+    if (id === 'modal-seguimiento' && seguimientoTargetId) openDetail(seguimientoTargetId);
+  });
+});
+
+// ══════════════════════════════════════════════
+//  INIT — Firebase se encarga de llamar renderTabs() y render()
+//          después de cargar los datos. No llamamos aquí.
+// ══════════════════════════════════════════════
+</script>
+
+<!-- ═══════════════════════════════════════════
+     PANTALLA DE LOGIN
+════════════════════════════════════════════ -->
+<div id="login-screen" style="
+  display:flex; align-items:center; justify-content:center;
+  min-height:100vh; background:#F7F6F3; flex-direction:column;
+  gap:0; position:fixed; inset:0; z-index:9999;">
+
+  <div style="background:#fff; border-radius:14px; padding:36px 32px 28px;
+    box-shadow:0 4px 24px rgba(0,0,0,.10); width:100%; max-width:360px;">
+
+    <!-- Logo -->
+    <div style="text-align:center; margin-bottom:28px;">
+      <div style="font-size:32px; margin-bottom:6px;">🏠</div>
+      <div style="font-size:18px; font-weight:700; color:#1A1916;">CRM Inmobiliario</div>
+      <div style="font-size:12px; color:#A09D95; margin-top:2px;">Control Comercial</div>
+    </div>
+
+    <!-- Mensaje de error / info -->
+    <div id="login-msg" style="
+      display:none; padding:9px 12px; border-radius:8px;
+      font-size:13px; margin-bottom:14px; text-align:center;">
+    </div>
+
+    <!-- Panel LOGIN -->
+    <div id="panel-login">
+      <!-- Email -->
+      <div style="margin-bottom:12px;">
+        <label style="display:block; font-size:12px; font-weight:600;
+          color:#6B6960; margin-bottom:5px;">Correo electrónico</label>
+        <input id="login-email" type="email" placeholder="tucorreo@ejemplo.com"
+          style="width:100%; padding:10px 12px; border:1px solid #E8E6E0;
+          border-radius:8px; font-size:14px; outline:none; transition:border .15s;"
+          onfocus="this.style.borderColor='#2563EB'"
+          onblur="this.style.borderColor='#E8E6E0'"
+          onkeydown="if(event.key==='Enter') loginFirebase()">
+      </div>
+
+      <!-- Contraseña -->
+      <div style="margin-bottom:8px;">
+        <label style="display:block; font-size:12px; font-weight:600;
+          color:#6B6960; margin-bottom:5px;">Contraseña</label>
+        <div style="position:relative;">
+          <input id="login-pass" type="password" placeholder="••••••••"
+            style="width:100%; padding:10px 40px 10px 12px; border:1px solid #E8E6E0;
+            border-radius:8px; font-size:14px; outline:none; transition:border .15s;"
+            onfocus="this.style.borderColor='#2563EB'"
+            onblur="this.style.borderColor='#E8E6E0'"
+            onkeydown="if(event.key==='Enter') loginFirebase()">
+          <!-- Ojo ver/ocultar contraseña -->
+          <button onclick="togglePassVisibility()" id="btn-eye"
+            style="position:absolute; right:10px; top:50%; transform:translateY(-50%);
+            background:none; border:none; cursor:pointer; font-size:17px;
+            color:#A09D95; padding:0; line-height:1;" title="Ver / ocultar contraseña">
+            👁
+          </button>
+        </div>
+      </div>
+
+      <!-- Olvidé contraseña -->
+      <div style="text-align:right; margin-bottom:20px;">
+        <span onclick="mostrarReset()" style="font-size:12px; color:#2563EB;
+          cursor:pointer; text-decoration:underline;">¿Olvidaste tu contraseña?</span>
+      </div>
+
+      <!-- Botón entrar -->
+      <button id="btn-login" onclick="loginFirebase()"
+        style="width:100%; padding:11px; background:#2563EB; color:#fff;
+        border:none; border-radius:8px; font-size:14px; font-weight:600;
+        cursor:pointer; transition:background .15s;"
+        onmouseover="this.style.background='#1D4ED8'"
+        onmouseout="this.style.background='#2563EB'">
+        Ingresar
+      </button>
+    </div>
+
+    <!-- Panel RECUPERAR CONTRASEÑA -->
+    <div id="panel-reset" style="display:none;">
+      <p style="font-size:13px; color:#6B6960; margin-bottom:14px; text-align:center;">
+        Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.
+      </p>
+      <div style="margin-bottom:16px;">
+        <label style="display:block; font-size:12px; font-weight:600;
+          color:#6B6960; margin-bottom:5px;">Correo electrónico</label>
+        <input id="reset-email" type="email" placeholder="tucorreo@ejemplo.com"
+          style="width:100%; padding:10px 12px; border:1px solid #E8E6E0;
+          border-radius:8px; font-size:14px; outline:none; transition:border .15s;"
+          onfocus="this.style.borderColor='#2563EB'"
+          onblur="this.style.borderColor='#E8E6E0'"
+          onkeydown="if(event.key==='Enter') enviarReset()">
+      </div>
+      <button onclick="enviarReset()"
+        style="width:100%; padding:11px; background:#2563EB; color:#fff;
+        border:none; border-radius:8px; font-size:14px; font-weight:600;
+        cursor:pointer; margin-bottom:10px;"
+        onmouseover="this.style.background='#1D4ED8'"
+        onmouseout="this.style.background='#2563EB'">
+        Enviar enlace
+      </button>
+      <button onclick="mostrarLogin()"
+        style="width:100%; padding:10px; background:none; color:#6B6960;
+        border:1px solid #E8E6E0; border-radius:8px; font-size:13px; cursor:pointer;">
+        ← Volver al inicio de sesión
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Pie de pantalla -->
+  <div style="margin-top:16px; font-size:11px; color:#A09D95;">
+    Acceso seguro con Firebase Authentication
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     FIREBASE SDK + LÓGICA DE AUTH Y FIRESTORE
+════════════════════════════════════════════ -->
+<script type="module">
+  import { initializeApp }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail,
+           onAuthStateChanged, signOut }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ══════════════════════════════════
+  //  ⚙️ PEGA AQUÍ TU CONFIGURACIÓN DE FIREBASE
+  // ══════════════════════════════════
+  const firebaseConfig = {
+    apiKey:            "REEMPLAZA_CON_TU_apiKey",
+    authDomain:        "REEMPLAZA_CON_TU_authDomain",
+    projectId:         "REEMPLAZA_CON_TU_projectId",
+    storageBucket:     "REEMPLAZA_CON_TU_storageBucket",
+    messagingSenderId: "REEMPLAZA_CON_TU_messagingSenderId",
+    appId:             "REEMPLAZA_CON_TU_appId"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  // ──────────────────────────────────
+  //  Detectar sesión activa / cerrada
+  // ──────────────────────────────────
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      // Usuario autenticado → cargar datos y mostrar app
+      await cargarDatosNube(user.uid);
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('user-email-label').textContent = user.email;
+    } else {
+      // Sin sesión → limpiar datos en memoria y mostrar login
+      records = [];
+      groups  = ["Grupo Asesores VLC","Grupo Caracas Pro","Red Inmobiliaria","Grupo Norte","Grupo Sur"];
+      document.getElementById('login-screen').style.display = 'flex';
+    }
+  });
+
+  // ──────────────────────────────────
+  //  Login con correo y contraseña
+  // ──────────────────────────────────
+  window.loginFirebase = async () => {
+    const email = document.getElementById('login-email').value.trim();
+    const pass  = document.getElementById('login-pass').value;
+    const btn   = document.getElementById('btn-login');
+
+    if (!email || !pass) {
+      mostrarMensaje('Por favor completa todos los campos.', 'error');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Ingresando…';
+    ocultarMensaje();
+
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+      // onAuthStateChanged se encarga del resto
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = 'Ingresar';
+      const msgs = {
+        'auth/invalid-credential':    'Correo o contraseña incorrectos.',
+        'auth/user-not-found':        'No existe una cuenta con ese correo.',
+        'auth/wrong-password':        'Contraseña incorrecta.',
+        'auth/too-many-requests':     'Demasiados intentos. Intenta más tarde.',
+        'auth/invalid-email':         'Correo no válido.',
+        'auth/network-request-failed':'Sin conexión a internet.',
+      };
+      mostrarMensaje(msgs[e.code] || 'Error: ' + e.message, 'error');
+    }
+  };
+
+  // ──────────────────────────────────
+  //  Cerrar sesión (limpia memoria)
+  // ──────────────────────────────────
+  window.logoutFirebase = async () => {
+    await signOut(auth);
+    // Los datos se limpian en el onAuthStateChanged (else branch)
+    mostrarLogin();
+  };
+
+  // ──────────────────────────────────
+  //  Recuperar contraseña
+  // ──────────────────────────────────
+  window.enviarReset = async () => {
+    const email = document.getElementById('reset-email').value.trim();
+    if (!email) { mostrarMensaje('Ingresa tu correo primero.', 'error'); return; }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      mostrarMensaje('✅ Enlace enviado. Revisa tu bandeja de entrada.', 'ok');
+    } catch (e) {
+      const msgs = {
+        'auth/user-not-found': 'No hay cuenta registrada con ese correo.',
+        'auth/invalid-email':  'Correo no válido.',
+      };
+      mostrarMensaje(msgs[e.code] || 'Error: ' + e.message, 'error');
+    }
+  };
+
+  // ──────────────────────────────────
+  //  Guardar en Firestore
+  // ──────────────────────────────────
+  window.guardarEnNube = async (datos) => {
+    const user = auth.currentUser;
+    if (!user) return;
+    try {
+      await setDoc(doc(db, 'crm', user.uid), datos);
+    } catch (e) {
+      console.error('Error guardando en Firestore:', e);
+    }
+  };
+
+  // ──────────────────────────────────
+  //  Cargar desde Firestore
+  // ──────────────────────────────────
+  async function cargarDatosNube(uid) {
+    try {
+      const snap = await getDoc(doc(db, 'crm', uid));
+      if (snap.exists()) {
+        const datos = snap.data();
+        if (Array.isArray(datos.records)) records = datos.records;
+        if (Array.isArray(datos.groups))  groups  = datos.groups;
+      }
+    } catch (e) {
+      console.error('Error cargando desde Firestore:', e);
+    }
+    renderTabs();
+    render();
+  }
+</script>
+
+<!-- ═══════════════════════════════════════════
+     HELPERS DE LOGIN (fuera del módulo para
+     que sean accesibles desde HTML onclick)
+════════════════════════════════════════════ -->
+<script>
+  function togglePassVisibility() {
+    const inp = document.getElementById('login-pass');
+    const btn = document.getElementById('btn-eye');
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      btn.textContent = '🙈';
+    } else {
+      inp.type = 'password';
+      btn.textContent = '👁';
+    }
+  }
+
+  function mostrarReset() {
+    ocultarMensaje();
+    document.getElementById('panel-login').style.display = 'none';
+    document.getElementById('panel-reset').style.display = 'block';
+    // Copiar email si ya lo escribió
+    const email = document.getElementById('login-email').value;
+    if (email) document.getElementById('reset-email').value = email;
+  }
+
+  function mostrarLogin() {
+    ocultarMensaje();
+    document.getElementById('panel-reset').style.display = 'none';
+    document.getElementById('panel-login').style.display = 'block';
+  }
+
+  function mostrarMensaje(texto, tipo) {
+    const el = document.getElementById('login-msg');
+    el.textContent = texto;
+    el.style.display = 'block';
+    if (tipo === 'error') {
+      el.style.background = '#FEF2F2';
+      el.style.color = '#DC2626';
+      el.style.border = '1px solid #FECACA';
+    } else {
+      el.style.background = '#F0FDF4';
+      el.style.color = '#16A34A';
+      el.style.border = '1px solid #BBF7D0';
+    }
+  }
+
+  function ocultarMensaje() {
+    document.getElementById('login-msg').style.display = 'none';
+  }
+</script>
+</body>
+</html>
