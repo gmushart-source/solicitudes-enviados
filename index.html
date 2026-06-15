@@ -1773,19 +1773,37 @@ function openGroupsConfig() {
 
 function renderGroupsConfig() {
   document.getElementById('groups-config-body').innerHTML = `
-    <p style="font-size:13px;color:var(--text-2);margin-bottom:14px;padding:0 0 0 0;">Agrega o edita los nombres de tus grupos de WhatsApp.</p>
+    <p style="font-size:13px;color:var(--text-2);margin-bottom:14px;padding:0 0 0 0;">Agrega o edita los nombres de tus grupos de WhatsApp. Presiona Enter para añadir uno nuevo.</p>
     ${tempGroups.map((g,i)=>`
       <div class="group-config-item">
-        <input type="text" class="group-name-input" value="${g}" onchange="tempGroups[${i}]=this.value">
+        <input type="text" class="group-name-input" id="group-input-${i}" value="${g}" placeholder="Nombre del grupo"
+          oninput="tempGroups[${i}]=this.value"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();onGroupEnter(${i});}">
         <button class="btn-icon" onclick="removeGroup(${i})" title="Eliminar">🗑</button>
       </div>
     `).join('')}
   `;
 }
 
+function focusGroupInput(i) {
+  const el = document.getElementById('group-input-'+i);
+  if (el) el.focus();
+}
+
+function onGroupEnter(i) {
+  // Si es el último campo, agrega uno nuevo en blanco y lo enfoca.
+  // Si no es el último, simplemente pasa el foco al siguiente campo.
+  if (i === tempGroups.length - 1) {
+    addGroup();
+  } else {
+    focusGroupInput(i+1);
+  }
+}
+
 function addGroup() {
-  tempGroups.push('Nuevo grupo');
+  tempGroups.push('');
   renderGroupsConfig();
+  focusGroupInput(tempGroups.length - 1);
 }
 
 function removeGroup(i) {
