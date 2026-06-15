@@ -10,6 +10,9 @@
 <link rel="dns-prefetch" href="https://firestore.googleapis.com">
 <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
 <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   :root {
     --bg: #F7F6F3;
@@ -312,6 +315,9 @@
       <div class="nav-label">Opciones</div>
       <div class="nav-item" onclick="openGroupsConfig()">
         <span class="nav-icon">💬</span><span>Grupos WA</span>
+      </div>
+      <div class="nav-item" onclick="exportarExcel()">
+        <span class="nav-icon">📊</span><span>Exportar Excel</span>
       </div>
     </div>
 
@@ -1815,6 +1821,112 @@ function saveGroups() {
   groups = tempGroups.map(g=>g.trim()).filter(Boolean);
   save();
   closeModal('modal-groups');
+}
+
+// ══════════════════════════════════════════════
+//  EXPORTAR A EXCEL
+// ══════════════════════════════════════════════
+function exportarExcel() {
+  if (typeof XLSX === 'undefined') {
+    alert('No se pudo cargar la librería de Excel. Verifica tu conexión a internet e intenta de nuevo.');
+    return;
+  }
+
+  const enviados   = records.filter(r => r.tipo === 'Enviado');
+  const solicitudes = records.filter(r => r.tipo === 'Solicitud');
+
+  // ── Hoja 1: Inmuebles enviados ──
+  const hojaEnviados = enviados.map(r => {
+    const list   = r.respuestas || [];
+    const si     = list.filter(x=>x.respondio==='Sí').length;
+    const no     = list.filter(x=>x.respondio==='No').length;
+    const pend   = list.filter(x=>x.respondio==='Pendiente').length;
+    return {
+      'Inmueble':           r.inmueble || '',
+      'Fecha':              r.fecha || '',
+      'Asesor captador':    r.asesor || '',
+      'Enviado por':        r.enviadoPor || '',
+      'Grupos WA':          (r.grupos||[]).join(', '),
+      'Total respuestas':   list.length,
+      'Respuestas Sí':      si,
+      'Respuestas No':      no,
+      'Respuestas pendientes': pend,
+      'Notas':              r.notas || '',
+    };
+  });
+
+  // ── Hoja 2: Respuestas (detalle, una fila por respuesta) ──
+  const hojaRespuestas = [];
+  enviados.forEach(r => {
+    (r.respuestas||[]).forEach(resp => {
+      hojaRespuestas.push({
+        'Inmueble':            r.inmueble || '',
+        'Fecha inmueble':      r.fecha || '',
+        'Asesor que respondió': resp.asesor || '',
+        '¿Es inmobiliaria?':   resp.esInmo || '',
+        'Inmobiliaria':        resp.inmobiliaria || '',
+        'Recibido por':        resp.recibioPor || '',
+        '¿Se envió el inmueble?': resp.respondio || '',
+        'Feedback':            resp.feedback || '',
+        'Notas':               resp.notas || '',
+      });
+    });
+  });
+
+  // ── Hoja 3: Seguimientos de respuesta ──
+  const hojaSeguimientos = [];
+  enviados.forEach(r => {
+    (r.seguimientos||[]).forEach(s => {
+      hojaSeguimientos.push({
+        'Inmueble':       r.inmueble || '',
+        'Fecha seguimiento': s.fecha || '',
+        'Estado':         s.estado || '',
+        'Notas':          s.notas || '',
+      });
+    });
+  });
+
+  // ── Hoja 4: Solicitudes ──
+  const hojaSolicitudes = solicitudes.map(r => ({
+    'Descripción':       r.desc || '',
+    'Fecha':             r.fecha || '',
+    'Asesor (tuyo)':     r.asesor || '',
+    'Recibió la solicitud': r.recibioPor || '',
+    'Estado':            r.estado || '',
+    'Motivo de cierre':  r.cierreMotivo || '',
+    'Opciones recibidas': (r.inmueblesSol||[]).length,
+    'Notas':             r.notas || '',
+  }));
+
+  // ── Hoja 5: Inmuebles recibidos (detalle, una fila por opción) ──
+  const hojaInmueblesSol = [];
+  solicitudes.forEach(r => {
+    (r.inmueblesSol||[]).forEach(m => {
+      hojaInmueblesSol.push({
+        'Solicitud':          r.desc ? (r.desc.length>60 ? r.desc.slice(0,60)+'…' : r.desc) : '',
+        'Fecha solicitud':    r.fecha || '',
+        'Inmueble':           m.nombre || '',
+        '¿Quién lo mandó?':   m.quien || '',
+        '¿Pasado al asesor?': m.pasado || '',
+        'Feedback':           m.feedback || '',
+        'Feedback detalle':   m.feedbackDetalle || '',
+        'Estado seguimiento': m.seguimientoEstado || '',
+        'Nota seguimiento':   m.seguimientoNota || '',
+        'Notas':              m.notas || '',
+      });
+    });
+  });
+
+  // ── Armar libro de Excel ──
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(hojaEnviados),     'Enviados');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(hojaRespuestas),   'Respuestas');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(hojaSeguimientos),'Seguimientos');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(hojaSolicitudes), 'Solicitudes');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(hojaInmueblesSol),'Inmuebles recibidos');
+
+  const nombreArchivo = `CRM_Inmobiliario_${today()}.xlsx`;
+  XLSX.writeFile(wb, nombreArchivo);
 }
 
 // ══════════════════════════════════════════════
