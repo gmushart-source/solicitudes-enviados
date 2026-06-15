@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🏠 CRM Comercial Inmobiliario</title>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.gstatic.com">
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
 <style>
   :root {
     --bg: #F7F6F3;
@@ -240,6 +246,16 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
+  /* Spinner de carga (verificación de sesión) */
+  .spinner {
+    width: 32px; height: 32px; margin: 0 auto;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
   @media (max-width: 768px) {
     .sidebar { width: 60px; }
     .logo-name, .logo-sub, .nav-label, .nav-item span:not(.nav-icon) { display: none; }
@@ -428,6 +444,13 @@
         <input type="text" id="fe-asesor" placeholder="Carlos Pérez">
       </div>
 
+      <!-- Quién envió el inmueble (tu equipo) -->
+      <div class="section-sep">Enviado por</div>
+      <div class="field-row">
+        <label class="field-label">¿Quién envió este inmueble?</label>
+        <input type="text" id="fe-enviado-por" placeholder="Tu nombre o el de tu compañero">
+      </div>
+
       <!-- Enviado a -->
       <div class="section-sep">Enviado a</div>
       <div class="field-row">
@@ -477,6 +500,10 @@
           <label class="field-label">Nombre de la inmobiliaria</label>
           <input type="text" id="mr-inmobiliaria" placeholder="Ej: Century 21, RE/MAX…">
         </div>
+      </div>
+      <div class="field-row">
+        <label class="field-label">¿Quién recibió esta respuesta?</label>
+        <input type="text" id="mr-recibio-por" placeholder="Tu nombre o el de tu compañero">
       </div>
       <div class="field-row">
         <label class="field-label">¿Se le envió el inmueble?</label>
@@ -578,6 +605,13 @@
       <div class="field-row">
         <label class="field-label">Nombre del asesor <span>*</span></label>
         <input type="text" id="fs-asesor" placeholder="Luis Mora">
+      </div>
+
+      <!-- Quién recibió la solicitud -->
+      <div class="section-sep">Recepción de la solicitud</div>
+      <div class="field-row">
+        <label class="field-label">¿Quién recibió la solicitud?</label>
+        <input type="text" id="fs-recibio-por" placeholder="Tu nombre o el de tu compañero">
       </div>
 
       <!-- Estado -->
@@ -1203,6 +1237,7 @@ function renderDetailEnviado(r) {
         </div>
       </div>
       ${resp.feedback?`<div style="margin-top:4px;font-size:12px;color:var(--text-2);">Feedback: ${tagColor(resp.feedback,FEED_MAP)}</div>`:''}
+      ${resp.recibioPor?`<div style="margin-top:4px;font-size:11px;color:var(--text-3);">📥 Recibido por: ${resp.recibioPor}</div>`:''}
       ${resp.notas?`<div style="margin-top:6px;font-size:12px;color:var(--text-2);line-height:1.4;">${resp.notas}</div>`:''}
       <div style="margin-top:8px;display:flex;gap:6px;">
         <button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="openRespuesta('${r.id}',${i})">✏️ Editar</button>
@@ -1234,6 +1269,14 @@ function renderDetailEnviado(r) {
       <div class="detail-field">
         <span class="detail-field-name">👤 Asesor captador</span>
         <span class="detail-field-value">${r.asesor||'—'}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Enviado por</div>
+      <div class="detail-field">
+        <span class="detail-field-name">🙋 Quién lo envió</span>
+        <span class="detail-field-value">${r.enviadoPor||'—'}</span>
       </div>
     </div>
 
@@ -1353,6 +1396,10 @@ function renderDetailSolicitud(r) {
         <span class="detail-field-name">👤 Asesor (tuyo)</span>
         <span class="detail-field-value">${r.asesor||'—'}</span>
       </div>
+      <div class="detail-field">
+        <span class="detail-field-name">📥 Recibida por</span>
+        <span class="detail-field-value">${r.recibioPor||'—'}</span>
+      </div>
       ${r.notas?`<div class="detail-field"><span class="detail-field-name">📝 Notas</span><span class="detail-field-value">${r.notas}</span></div>`:''}
     </div>
 
@@ -1445,6 +1492,7 @@ function deleteRespuesta(id, idx) {
     if (!r || !r.respuestas) return;
     r.respuestas.splice(idx, 1);
     save();
+    render();
     openDetail(id);
   });
 }
@@ -1463,6 +1511,7 @@ function quickChangeEstado(id, estado) {
   r.estado = estado;
   r.cierreMotivo = '';
   save();
+  render();
   openDetail(id);
 }
 
@@ -1472,6 +1521,7 @@ function quickConfirmCierre(id) {
   r.estado = 'Cerrada';
   r.cierreMotivo = document.getElementById('quick-cierre-motivo-'+id).value;
   save();
+  render();
   openDetail(id);
 }
 
@@ -1490,6 +1540,7 @@ function saveEnviado() {
     inmueble,
     fecha:     document.getElementById('fe-fecha').value,
     asesor:    document.getElementById('fe-asesor').value.trim(),
+    enviadoPor: document.getElementById('fe-enviado-por').value.trim(),
     dest:      document.getElementById('fe-dest').value.trim(),
     grupos:    selectedGrps,
     respondio: document.getElementById('fe-respondio').value,
@@ -1525,6 +1576,7 @@ function saveSolicitud() {
     tipo:         'Solicitud',
     desc,
     asesor,
+    recibioPor:   document.getElementById('fs-recibio-por').value.trim(),
     fecha:        document.getElementById('fs-fecha').value,
     estado,
     cierreMotivo: estado === 'Cerrada' ? document.getElementById('fs-cierre-motivo').value : '',
@@ -1555,6 +1607,7 @@ function openNew(mode, data) {
     document.getElementById('fe-inmueble').value  = data?.inmueble||'';
     document.getElementById('fe-fecha').value     = data?.fecha||today();
     document.getElementById('fe-asesor').value    = data?.asesor||'';
+    document.getElementById('fe-enviado-por').value = data?.enviadoPor||'';
 
     // Groups picker
     const selGrps = data?.grupos||[];
@@ -1571,6 +1624,7 @@ function openNew(mode, data) {
     document.getElementById('fs-desc').value          = data?.desc||'';
     document.getElementById('fs-fecha').value         = data?.fecha||today();
     document.getElementById('fs-asesor').value        = data?.asesor||'';
+    document.getElementById('fs-recibio-por').value   = data?.recibioPor||'';
     document.getElementById('fs-estado').value        = data?.estado||'Pendiente';
     document.getElementById('fs-cierre-motivo').value = data?.cierreMotivo||'Negociación';
     document.getElementById('fs-notas').value         = data?.notas||'';
@@ -1623,6 +1677,7 @@ function openRespuesta(id, idx) {
   document.getElementById('mr-asesor').value      = resp?.asesor||'';
   document.getElementById('mr-es-inmo').value     = resp?.esInmo||'No';
   document.getElementById('mr-inmobiliaria').value = resp?.inmobiliaria||'';
+  document.getElementById('mr-recibio-por').value = resp?.recibioPor||'';
   document.getElementById('mr-respondio').value   = resp?.respondio||'Pendiente';
   document.getElementById('mr-feedback').value    = resp?.feedback||'';
   document.getElementById('mr-notas').value       = resp?.notas||'';
@@ -1656,6 +1711,7 @@ function saveRespuesta() {
     asesor,
     esInmo:       document.getElementById('mr-es-inmo').value,
     inmobiliaria: document.getElementById('mr-inmobiliaria').value.trim(),
+    recibioPor:   document.getElementById('mr-recibio-por').value.trim(),
     respondio:    document.getElementById('mr-respondio').value,
     feedback:     document.getElementById('mr-feedback').value,
     notas:        document.getElementById('mr-notas').value.trim(),
@@ -1667,6 +1723,7 @@ function saveRespuesta() {
     r.respuestas.push(newResp);
   }
   save();
+  render();
   closeModal('modal-respuesta');
   openDetail(respuestaTargetId);
 }
@@ -1811,8 +1868,14 @@ document.querySelectorAll('.modal-bg').forEach(m => {
       font-size:13px; margin-bottom:14px; text-align:center;">
     </div>
 
+    <!-- Panel VERIFICANDO SESIÓN (spinner inicial) -->
+    <div id="panel-checking" style="text-align:center; padding:24px 0 8px;">
+      <div class="spinner"></div>
+      <div style="font-size:13px; color:#A09D95; margin-top:14px;">Verificando sesión…</div>
+    </div>
+
     <!-- Panel LOGIN -->
-    <div id="panel-login">
+    <div id="panel-login" style="display:none;">
       <!-- Email -->
       <div style="margin-bottom:12px;">
         <label style="display:block; font-size:12px; font-weight:600;
@@ -1943,6 +2006,8 @@ document.querySelectorAll('.modal-bg').forEach(m => {
       records = [];
       groups  = ["Grupo Asesores VLC","Grupo Caracas Pro","Red Inmobiliaria","Grupo Norte","Grupo Sur"];
       document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('panel-checking').style.display = 'none';
+      document.getElementById('panel-login').style.display = 'block';
     }
   });
 
@@ -1987,6 +2052,22 @@ document.querySelectorAll('.modal-bg').forEach(m => {
   window.logoutFirebase = async () => {
     await signOut(auth);
     // Los datos se limpian en el onAuthStateChanged (else branch)
+
+    // Limpiar campos del formulario de login para que no queden
+    // datos del usuario anterior visibles
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-pass').value  = '';
+    document.getElementById('reset-email').value = '';
+
+    // Restaurar contraseña a tipo "password" (oculta) y el ícono del ojo
+    const passInput = document.getElementById('login-pass');
+    const eyeBtn    = document.getElementById('btn-eye');
+    if (passInput) passInput.type = 'password';
+    if (eyeBtn)    eyeBtn.textContent = '👁';
+
+    // Limpiar etiqueta de correo del usuario anterior
+    document.getElementById('user-email-label').textContent = '';
+
     mostrarLogin();
   };
 
@@ -2009,11 +2090,17 @@ document.querySelectorAll('.modal-bg').forEach(m => {
   };
 
   // ──────────────────────────────────
-  //  Guardar en Firestore
+  //  Guardar en Firestore (+ caché local
+  //  para que la próxima carga sea instantánea)
   // ──────────────────────────────────
   window.guardarEnNube = async (datos) => {
     const user = auth.currentUser;
     if (!user) return;
+    try {
+      localStorage.setItem('crm_cache_' + user.uid, JSON.stringify(datos));
+    } catch (e) {
+      console.warn('No se pudo guardar la caché local:', e);
+    }
     try {
       await setDoc(doc(db, 'crm', user.uid), datos);
     } catch (e) {
@@ -2023,14 +2110,32 @@ document.querySelectorAll('.modal-bg').forEach(m => {
 
   // ──────────────────────────────────
   //  Cargar desde Firestore
+  //  1) Pintamos al instante con la caché local (si existe)
+  //  2) Confirmamos/actualizamos con Firestore en segundo plano
   // ──────────────────────────────────
   async function cargarDatosNube(uid) {
+    // Paso 1: caché local → primer pintado instantáneo
+    try {
+      const cached = localStorage.getItem('crm_cache_' + uid);
+      if (cached) {
+        const datos = JSON.parse(cached);
+        if (Array.isArray(datos.records)) records = datos.records;
+        if (Array.isArray(datos.groups))  groups  = datos.groups;
+        renderTabs();
+        render();
+      }
+    } catch (e) {
+      console.warn('No se pudo leer la caché local:', e);
+    }
+
+    // Paso 2: datos reales desde Firestore
     try {
       const snap = await getDoc(doc(db, 'crm', uid));
       if (snap.exists()) {
         const datos = snap.data();
         if (Array.isArray(datos.records)) records = datos.records;
         if (Array.isArray(datos.groups))  groups  = datos.groups;
+        try { localStorage.setItem('crm_cache_' + uid, JSON.stringify(datos)); } catch(e) {}
       }
     } catch (e) {
       console.error('Error cargando desde Firestore:', e);
@@ -2068,6 +2173,7 @@ document.querySelectorAll('.modal-bg').forEach(m => {
 
   function mostrarLogin() {
     ocultarMensaje();
+    document.getElementById('panel-checking').style.display = 'none';
     document.getElementById('panel-reset').style.display = 'none';
     document.getElementById('panel-login').style.display = 'block';
   }
