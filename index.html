@@ -244,6 +244,19 @@
   .prop-feedback-row:last-child { border-bottom:none; }
   .prop-feedback-name { font-size:12px;font-weight:500;flex:1; }
 
+  /* ─── DETAIL INNER TABS ─── */
+  .detail-tabs { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:14px; }
+  .detail-tab { padding:8px 14px; font-size:12px; font-weight:500; color:var(--text-2); cursor:pointer; border-bottom:2px solid transparent; transition:color .12s; white-space:nowrap; }
+  .detail-tab:hover { color:var(--text); }
+  .detail-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+  .detail-tab-badge { display:inline-flex; align-items:center; justify-content:center; margin-left:5px; background:var(--bg); border:1px solid var(--border); border-radius:20px; font-size:10px; padding:0 5px; min-width:16px; color:var(--text-3); }
+  .detail-tab.active .detail-tab-badge { background:var(--accent-bg); border-color:#93C5FD; color:var(--accent); }
+
+  /* ─── MODAL SEARCH BAR ─── */
+  .modal-search { display:flex; align-items:center; gap:8px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); padding:7px 12px; margin:0 20px 14px; font-size:13px; color:var(--text-2); }
+  .modal-search input { background:none; border:none; outline:none; flex:1; font-size:13px; color:var(--text); font-family:inherit; }
+  .modal-search-wrap { padding-top:14px; }
+
   /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -489,6 +502,12 @@
       <div class="modal-title" id="mr-title">💬 Registrar respuesta de un asesor</div>
       <button class="modal-close" onclick="closeModal('modal-respuesta')">×</button>
     </div>
+    <div style="padding:12px 20px 0;">
+      <div class="modal-search">
+        🔍 <input id="mr-search" type="text" placeholder="Buscar asesor existente…" oninput="filterRespuestaSearch()" autocomplete="off">
+      </div>
+      <div id="mr-search-results" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;max-height:120px;overflow-y:auto;"></div>
+    </div>
     <div class="modal-body">
       <div class="field-row">
         <label class="field-label">Asesor que respondió <span>*</span></label>
@@ -522,14 +541,18 @@
       <div id="mr-extra" style="display:none;">
         <div class="field-row">
           <label class="field-label">Feedback recibido</label>
-          <select id="mr-feedback">
+          <select id="mr-feedback" onchange="toggleMrFeedback()">
             <option value="">— Sin especificar —</option>
-            <option value="Interesado">Interesado</option>
-            <option value="Solicita visita">Solicita visita</option>
-            <option value="No le interesa">No le interesa</option>
-            <option value="Precio alto">Precio alto</option>
-            <option value="Lo tiene en cartera">Lo tiene en cartera</option>
+            <option value="Interesado">✅ Interesado</option>
+            <option value="Solicita visita">📅 Solicita visita</option>
+            <option value="No le interesa">❌ No le interesa</option>
+            <option value="Precio alto">💰 Precio alto</option>
+            <option value="Lo tiene en cartera">📁 Lo tiene en cartera</option>
+            <option value="No califica">🚫 No califica</option>
           </select>
+          <div id="mr-feedback-hint" style="display:none;margin-top:6px;padding:7px 10px;border-radius:var(--radius-sm);font-size:12px;background:var(--accent-bg);color:var(--accent);border:1px solid #BFDBFE;">
+            💡 Al guardar, esta respuesta pasará a <strong>Seguimiento</strong> para continuar el proceso.
+          </div>
         </div>
       </div>
       <div class="field-row">
@@ -551,12 +574,14 @@
 <div class="modal-bg" id="modal-seguimiento">
   <div class="modal" style="max-width:480px;">
     <div class="modal-header">
-      <div class="modal-title">🔄 Seguimiento de respuesta</div>
+      <div class="modal-title">🔄 Agregar nota de seguimiento</div>
       <button class="modal-close" onclick="closeModal('modal-seguimiento')">×</button>
     </div>
     <div class="modal-body">
+      <!-- Contexto del asesor vinculado -->
+      <div id="ms-contexto" style="display:none;padding:8px 12px;background:var(--accent-bg);border:1px solid #BFDBFE;border-radius:var(--radius-sm);margin-bottom:14px;font-size:12px;color:var(--accent);"></div>
       <div class="field-row">
-        <label class="field-label">Fecha del seguimiento</label>
+        <label class="field-label">Fecha</label>
         <input type="date" id="ms-fecha">
       </div>
       <div class="field-row">
@@ -571,13 +596,13 @@
         </select>
       </div>
       <div class="field-row">
-        <label class="field-label">Notas del seguimiento</label>
+        <label class="field-label">Notas</label>
         <textarea id="ms-notas" placeholder="¿Qué pasó? ¿Cuál es el próximo paso?…" style="min-height:70px;"></textarea>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeSeguimiento()">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveSeguimiento()">Guardar seguimiento</button>
+      <button class="btn btn-primary" onclick="saveSeguimiento()">Guardar nota</button>
     </div>
   </div>
 </div>
@@ -665,6 +690,12 @@
       <div class="modal-title" id="modal-inmueble-sol-title">🏠 Agregar inmueble recibido</div>
       <button class="modal-close" onclick="closeModal('modal-inmueble-sol')">×</button>
     </div>
+    <div style="padding:12px 20px 0;">
+      <div class="modal-search">
+        🔍 <input id="fi-search" type="text" placeholder="Buscar inmueble ya registrado…" oninput="filterInmuebleSolSearch()" autocomplete="off">
+      </div>
+      <div id="fi-search-results" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;max-height:120px;overflow-y:auto;"></div>
+    </div>
     <div class="modal-body">
       <div class="field-row">
         <label class="field-label">Nombre del inmueble <span>*</span></label>
@@ -736,6 +767,11 @@
     <div class="modal-header">
       <div class="modal-title">Detalle del registro</div>
       <button class="modal-close" onclick="closeModal('modal-detail')">×</button>
+    </div>
+    <div id="detail-search-wrap" style="display:none;padding:12px 20px 0;">
+      <div class="modal-search">
+        🔍 <input id="detail-search-input" type="text" placeholder="Buscar respuesta o asesor…" oninput="filterDetailContent()">
+      </div>
     </div>
     <div class="modal-body" id="detail-body"></div>
     <div class="modal-footer">
@@ -1199,6 +1235,13 @@ function renderGrouped(data, area) {
 function openDetail(id) {
   const r = records.find(x=>x.id===id);
   if (!r) return;
+  // Reset search when opening a different record
+  if (detailId !== id) {
+    detailInnerTab = 0;
+    detailSearchQuery = '';
+    const inp = document.getElementById('detail-search-input');
+    if (inp) inp.value = '';
+  }
   detailId = id;
 
   if (r.tipo === 'Enviado') {
@@ -1210,58 +1253,187 @@ function openDetail(id) {
   document.getElementById('modal-detail').classList.add('open');
 }
 
-function renderDetailEnviado(r) {
+// Track which inner tab is active for each detail modal (0=Respuestas, 1=Seguimiento)
+let detailInnerTab = 0;
+
+function renderDetailEnviado(r, forceTab) {
+  if (forceTab !== undefined) detailInnerTab = forceTab;
   const grupo_tags = (r.grupos||[]).map(g=>`<span class="tag tag-teal">💬 ${g}</span>`).join(' ');
 
-  // Seguimiento items
-  const seguimientoList = (r.seguimientos||[]);
-  const seguimientoHTML = seguimientoList.length ? seguimientoList.map((s,i)=>`
-    <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border-light);">
-      <div style="font-size:18px;line-height:1;margin-top:2px;">🔄</div>
-      <div style="flex:1;">
-        <div style="font-size:12px;font-weight:500;color:var(--text);">${s.estado||'—'}</div>
-        ${s.notas?`<div style="font-size:12px;color:var(--text-2);margin-top:2px;">${s.notas}</div>`:''}
-        <div style="font-size:11px;color:var(--text-3);margin-top:2px;">${s.fecha||''}</div>
-      </div>
-    </div>
-  `).join('') : `<div style="font-size:12px;color:var(--text-3);padding:8px 0;">Sin seguimientos registrados aún.</div>`;
+  const respuestas     = r.respuestas     || [];
+  const seguimientoList = r.seguimientos  || [];
 
-  // Lista de respuestas (escala 2)
-  const respuestas = r.respuestas||[];
-  const respuestasHTML = respuestas.length ? respuestas.map((resp,i) => {
-    const respClass = resp.respondio==='Sí' ? 'respondio-si' : resp.respondio==='No' ? 'respondio-no' : '';
-    const inmoBadge = resp.esInmo==='Sí' && resp.inmobiliaria
-      ? `<span class="inmo-badge">🏢 ${resp.inmobiliaria}</span>`
-      : (resp.esInmo==='Sí' ? `<span class="inmo-badge">🏢 Inmobiliaria</span>` : '');
-    return `
-    <div class="seguimiento-box ${respClass}" style="margin-bottom:8px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;">
-        <span style="font-size:13px;font-weight:500;">👤 ${resp.asesor||'—'}</span>
-        <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
-          ${inmoBadge}
-          ${tagColor(resp.respondio||'Pendiente', RESP_MAP)}
-        </div>
+  // Mostrar barra de búsqueda
+  const searchWrap = document.getElementById('detail-search-wrap');
+  if (searchWrap) {
+    searchWrap.style.display = 'block';
+    const inp = document.getElementById('detail-search-input');
+    if (inp) inp.placeholder = detailInnerTab === 1 ? 'Buscar asesor, feedback…' : 'Buscar asesor, notas…';
+  }
+
+  const q = (detailSearchQuery||'').toLowerCase();
+
+  // ─── TAB RESPUESTAS: sólo las que NO tienen feedback aún ───
+  const filteredResp = q
+    ? respuestas.filter(x =>
+        (x.asesor||'').toLowerCase().includes(q) ||
+        (x.notas||'').toLowerCase().includes(q) ||
+        (x.inmobiliaria||'').toLowerCase().includes(q)
+      )
+    : respuestas;
+
+  const respuestasHTML = filteredResp.length
+    ? filteredResp.map((resp) => {
+        const origIdx = respuestas.indexOf(resp);
+        const respClass = resp.respondio==='Sí' ? 'respondio-si' : resp.respondio==='No' ? 'respondio-no' : '';
+        const inmoBadge = resp.esInmo==='Sí' && resp.inmobiliaria
+          ? `<span class="inmo-badge">🏢 ${resp.inmobiliaria}</span>`
+          : (resp.esInmo==='Sí' ? `<span class="inmo-badge">🏢 Inmobiliaria</span>` : '');
+        return `
+        <div class="seguimiento-box ${respClass}" style="margin-bottom:8px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;">
+            <span style="font-size:13px;font-weight:500;">👤 ${resp.asesor||'—'}</span>
+            <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
+              ${inmoBadge}
+              ${tagColor(resp.respondio||'Pendiente', RESP_MAP)}
+            </div>
+          </div>
+          ${resp.recibioPor?`<div style="margin-top:4px;font-size:11px;color:var(--text-3);">📥 Recibido por: ${resp.recibioPor}</div>`:''}
+          ${resp.notas?`<div style="margin-top:6px;font-size:12px;color:var(--text-2);line-height:1.4;">${resp.notas}</div>`:''}
+          <div style="margin-top:6px;font-size:11px;color:var(--accent);">💡 Edita esta respuesta y agrega un feedback para pasarla a Seguimiento.</div>
+          <div style="margin-top:8px;display:flex;gap:6px;">
+            <button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="openRespuesta('${r.id}',${origIdx})">✏️ Editar / agregar feedback</button>
+            <button class="btn btn-danger" style="font-size:11px;padding:3px 10px;" onclick="deleteRespuesta('${r.id}',${origIdx})">🗑</button>
+          </div>
+        </div>`;
+      }).join('')
+    : (q
+        ? `<div style="font-size:13px;color:var(--text-3);padding:8px 0;">Sin resultados para "<strong>${q}</strong>".</div>`
+        : `<div style="font-size:13px;color:var(--text-2);padding:8px 0;">⏳ Sin respuestas pendientes de feedback.</div>`);
+
+  // ─── TAB SEGUIMIENTO: tarjetas vinculadas al asesor ───
+  const FEED_COLOR = {
+    'Interesado':        '#16A34A',
+    'Solicita visita':   '#D97706',
+    'No le interesa':    '#DC2626',
+    'Precio alto':       '#DC2626',
+    'Lo tiene en cartera':'#7C3AED',
+    'No califica':       '#6B6960',
+  };
+  const FEED_BG = {
+    'Interesado':        '#F0FDF4',
+    'Solicita visita':   '#FFFBEB',
+    'No le interesa':    '#FEF2F2',
+    'Precio alto':       '#FEF2F2',
+    'Lo tiene en cartera':'#F5F3FF',
+    'No califica':       '#F7F6F3',
+  };
+
+  const filteredSeg = q
+    ? seguimientoList.filter(s =>
+        (s.asesorVinculado||'').toLowerCase().includes(q) ||
+        (s.feedback||'').toLowerCase().includes(q) ||
+        (s.notasRespuesta||'').toLowerCase().includes(q) ||
+        (s.inmobiliaria||'').toLowerCase().includes(q) ||
+        (s.historial||[]).some(h =>
+          (h.estado||'').toLowerCase().includes(q) ||
+          (h.notas||'').toLowerCase().includes(q)
+        )
+      )
+    : seguimientoList;
+
+  const SEG_ESTADO_COLOR = {
+    'En negociación':  { bg:'#F0FDFA', color:'#0D9488', border:'#99F6E4' },
+    'Visita agendada': { bg:'#FFFBEB', color:'#D97706', border:'#FDE68A' },
+    'Oferta enviada':  { bg:'#EFF6FF', color:'#2563EB', border:'#BFDBFE' },
+    'Cerrado positivo':{ bg:'#F0FDF4', color:'#16A34A', border:'#BBF7D0' },
+    'Cerrado negativo':{ bg:'#FEF2F2', color:'#DC2626', border:'#FCA5A5' },
+    'Sin novedad':     { bg:'#F7F6F3', color:'#6B6960', border:'#E8E6E0' },
+  };
+
+  const seguimientoHTML = filteredSeg.length
+    ? filteredSeg.map((s, idx) => {
+        const origIdx = seguimientoList.indexOf(s);
+        const fColor = FEED_COLOR[s.feedback] || '#6B6960';
+        const fBg    = FEED_BG[s.feedback]    || '#F7F6F3';
+        const inmoBadge = s.esInmo==='Sí' && s.inmobiliaria
+          ? `<span class="inmo-badge" style="margin-left:4px;">🏢 ${s.inmobiliaria}</span>` : '';
+
+        // Historial de notas de seguimiento
+        const histHTML = (s.historial||[]).length
+          ? (s.historial).map(h => {
+              const sc = SEG_ESTADO_COLOR[h.estado] || SEG_ESTADO_COLOR['Sin novedad'];
+              return `
+              <div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--border-light);">
+                <div style="font-size:15px;line-height:1;margin-top:1px;">🔄</div>
+                <div style="flex:1;">
+                  <span style="display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:${sc.bg};color:${sc.color};border:1px solid ${sc.border};">${h.estado}</span>
+                  ${h.notas?`<div style="font-size:12px;color:var(--text-2);margin-top:3px;">${h.notas}</div>`:''}
+                  <div style="font-size:10px;color:var(--text-3);margin-top:2px;">${h.fecha||''}</div>
+                </div>
+              </div>`;
+            }).join('')
+          : `<div style="font-size:11px;color:var(--text-3);padding-top:6px;border-top:1px solid var(--border-light);">Sin notas de seguimiento aún.</div>`;
+
+        const esNoCalifica = s.feedback === 'No califica';
+
+        return `
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow);">
+          <!-- Cabecera: asesor + feedback -->
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span style="font-size:13px;font-weight:600;">👤 ${s.asesorVinculado||'—'}</span>
+              ${inmoBadge}
+            </div>
+            <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:${fBg};color:${fColor};border:1px solid ${fColor}22;">${s.feedback||'Sin feedback'}</span>
+          </div>
+          <!-- Info de la respuesta original -->
+          <div style="background:var(--bg);border-radius:var(--radius-sm);padding:7px 10px;margin-bottom:8px;">
+            ${s.recibioPor?`<div style="font-size:11px;color:var(--text-3);">📥 Recibido por: ${s.recibioPor}</div>`:''}
+            ${s.notasRespuesta?`<div style="font-size:12px;color:var(--text-2);margin-top:3px;">💬 ${s.notasRespuesta}</div>`:''}
+            <div style="font-size:10px;color:var(--text-3);margin-top:3px;">${s.fechaRespuesta||''}</div>
+          </div>
+          <!-- Historial de seguimiento -->
+          <div style="margin-bottom:8px;">${histHTML}</div>
+          <!-- Botones -->
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            ${!esNoCalifica ? `<button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="openSeguimiento('${r.id}',${origIdx})">+ Nota de seguimiento</button>` : ''}
+            <button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="editarRespuestaDesdeSegFn('${r.id}',${origIdx})">✏️ Editar respuesta</button>
+            <button class="btn btn-danger" style="font-size:11px;padding:3px 10px;" onclick="deleteSegVinculado('${r.id}',${origIdx})">🗑</button>
+          </div>
+        </div>`;
+      }).join('')
+    : (q
+        ? `<div style="font-size:12px;color:var(--text-3);padding:8px 0;">Sin resultados para "<strong>${q}</strong>".</div>`
+        : `<div style="font-size:12px;color:var(--text-3);padding:8px 0;">Aún sin respuestas con feedback. Edita una respuesta y asígnale un feedback para que aparezca aquí.</div>`);
+
+  // Siempre mostrar ambas pestañas
+  const tabsHTML = `
+    <div class="detail-tabs">
+      <div class="detail-tab${detailInnerTab===0?' active':''}" onclick="switchDetailTab('${r.id}',0)">
+        💬 Respuestas<span class="detail-tab-badge">${respuestas.length}</span>
       </div>
-      ${resp.feedback?`<div style="margin-top:4px;font-size:12px;color:var(--text-2);">Feedback: ${tagColor(resp.feedback,FEED_MAP)}</div>`:''}
-      ${resp.recibioPor?`<div style="margin-top:4px;font-size:11px;color:var(--text-3);">📥 Recibido por: ${resp.recibioPor}</div>`:''}
-      ${resp.notas?`<div style="margin-top:6px;font-size:12px;color:var(--text-2);line-height:1.4;">${resp.notas}</div>`:''}
-      <div style="margin-top:8px;display:flex;gap:6px;">
-        <button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="openRespuesta('${r.id}',${i})">✏️ Editar</button>
-        <button class="btn btn-danger" style="font-size:11px;padding:3px 10px;" onclick="deleteRespuesta('${r.id}',${i})">🗑 Eliminar</button>
+      <div class="detail-tab${detailInnerTab===1?' active':''}" onclick="switchDetailTab('${r.id}',1)">
+        🔄 Seguimiento<span class="detail-tab-badge">${seguimientoList.length}</span>
       </div>
     </div>`;
-  }).join('') : `<div style="font-size:13px;color:var(--text-2);margin-bottom:10px;">⏳ Aún sin respuestas registradas.</div>`;
 
-  // Escala 3: seguimiento — solo mostrar si al menos una respuesta es "Sí"
-  const seguimientoSection = respuestas.some(x=>x.respondio==='Sí') ? `
-    <div class="detail-section">
-      <div class="detail-section-title" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>Seguimiento de respuesta</span>
-        <button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="openSeguimiento('${r.id}')">+ Agregar</button>
+  const tabContentHTML = detailInnerTab === 1 ? `
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:12px;color:var(--text-2);">${seguimientoList.length} asesor${seguimientoList.length!==1?'es':''} con feedback</span>
       </div>
-      <div style="margin-top:4px;">${seguimientoHTML}</div>
+      ${seguimientoHTML}
     </div>
-  ` : '';
+  ` : `
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:12px;color:var(--text-2);">${respuestas.length} respuesta${respuestas.length!==1?'s':''} sin feedback</span>
+        <button class="btn btn-teal" style="font-size:11px;padding:3px 10px;" onclick="openRespuesta('${r.id}')">+ Agregar respuesta</button>
+      </div>
+      ${respuestasHTML}
+    </div>
+  `;
 
   document.getElementById('detail-body').innerHTML = `
     <div class="detail-meta">
@@ -1292,28 +1464,98 @@ function renderDetailEnviado(r) {
       <div class="detail-field"><span class="detail-field-name">💬 Grupos WA</span><span class="detail-field-value"><div class="tags-wrap">${grupo_tags}</div></span></div>
     </div>`:''}
 
-    <div class="detail-section">
-      <div class="detail-section-title" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>Respuestas (${respuestas.length})</span>
-        <button class="btn btn-teal" style="font-size:11px;padding:3px 10px;" onclick="openRespuesta('${r.id}')">+ Agregar respuesta</button>
-      </div>
-      <div style="margin-top:4px;">${respuestasHTML}</div>
+    <div class="detail-section" style="margin-bottom:0;">
+      ${tabsHTML}
+      ${tabContentHTML}
     </div>
-
-    ${seguimientoSection}
   `;
 }
 
+function switchDetailTab(id, tabIdx) {
+  detailInnerTab = tabIdx;
+  detailSearchQuery = '';
+  const inp = document.getElementById('detail-search-input');
+  if (inp) inp.value = '';
+  const r = records.find(x=>x.id===id);
+  if (r) renderDetailEnviado(r);
+}
+
+// Editar la respuesta vinculada desde Seguimiento (pre-carga los datos del seguimiento)
+function editarRespuestaDesdeSegFn(recordId, segIdx) {
+  const r = records.find(x=>x.id===recordId);
+  if (!r || !r.seguimientos) return;
+  const s = r.seguimientos[segIdx];
+  if (!s) return;
+
+  // Convertir el seguimiento vinculado de vuelta a una respuesta temporal para editar
+  // Buscar si ya existe en respuestas (no debería, pero por si acaso)
+  respuestaTargetId = recordId;
+  respuestaEditIdx  = null; // Siempre nuevo en respuestas (el original fue movido)
+
+  // Pre-llenar el modal con los datos del seguimiento vinculado
+  document.getElementById('mr-asesor').value       = s.asesorVinculado||'';
+  document.getElementById('mr-es-inmo').value      = s.esInmo||'No';
+  document.getElementById('mr-inmobiliaria').value = s.inmobiliaria||'';
+  document.getElementById('mr-recibio-por').value  = s.recibioPor||'';
+  document.getElementById('mr-respondio').value    = 'Sí';
+  document.getElementById('mr-feedback').value     = s.feedback||'';
+  document.getElementById('mr-notas').value        = s.notasRespuesta||'';
+
+  // Eliminar el seguimiento actual (se re-creará al guardar)
+  r.seguimientos.splice(segIdx, 1);
+  save();
+
+  toggleMrExtra();
+  toggleMrInmo();
+  toggleMrFeedback();
+
+  closeModal('modal-detail');
+  document.getElementById('modal-respuesta').classList.add('open');
+}
+
+// Eliminar un seguimiento vinculado
+function deleteSegVinculado(recordId, segIdx) {
+  showConfirm('¿Eliminar este seguimiento? Se perderá el feedback y el historial de notas de este asesor.', () => {
+    const r = records.find(x=>x.id===recordId);
+    if (!r || !r.seguimientos) return;
+    r.seguimientos.splice(segIdx, 1);
+    save();
+    render();
+    detailInnerTab = 1;
+    openDetail(recordId);
+  });
+}
+
 function renderDetailSolicitud(r) {
+  // Show search bar for solicitud inmuebles
+  const searchWrap = document.getElementById('detail-search-wrap');
+  if (searchWrap) {
+    searchWrap.style.display = 'block';
+    const inp = document.getElementById('detail-search-input');
+    if (inp) inp.placeholder = 'Buscar inmueble, asesor o feedback…';
+  }
+
+  const q = (detailSearchQuery||'').toLowerCase();
   const inmuebles = r.inmueblesSol || [];
+
+  const filteredInmuebles = q
+    ? inmuebles.filter(m =>
+        (m.nombre||'').toLowerCase().includes(q) ||
+        (m.quien||'').toLowerCase().includes(q) ||
+        (m.feedback||'').toLowerCase().includes(q) ||
+        (m.feedbackDetalle||'').toLowerCase().includes(q) ||
+        (m.seguimientoEstado||'').toLowerCase().includes(q)
+      )
+    : inmuebles;
 
   const inmueblesHTML = inmuebles.length ? `
     <div class="sub-table-wrap">
       <div class="sub-table-head">
-        <span class="sub-table-title">🏠 Inmuebles recibidos (${inmuebles.length})</span>
+        <span class="sub-table-title">🏠 Inmuebles recibidos (${filteredInmuebles.length}${q?'/'+inmuebles.length:''})</span>
         <button class="btn btn-teal" style="padding:4px 10px;font-size:12px;" onclick="openAddInmuebleSol('${r.id}')">+ Agregar</button>
       </div>
-      ${inmuebles.map((m,i) => {
+      ${filteredInmuebles.length ? filteredInmuebles.map((m) => {
+        const i = inmuebles.indexOf(m);
         const segMap = {
           'En evaluación':'seg-badge-eval','Interesado':'seg-badge-inter',
           'Visita agendada':'seg-badge-visita','En negociación':'seg-badge-negoc','No aplica':'seg-badge-no'
@@ -1340,7 +1582,7 @@ function renderDetailSolicitud(r) {
             <button class="btn btn-danger" style="font-size:11px;padding:3px 10px;" onclick="deleteInmuebleSol('${r.id}',${i})">🗑 Eliminar</button>
           </div>
         </div>`
-      }).join('')}
+      }).join('') : `<div style="padding:12px;font-size:12px;color:var(--text-3);text-align:center;">Sin resultados para "<strong>${q}</strong>".</div>`}
     </div>
   ` : `
     <div class="sub-table-wrap" style="padding:12px;text-align:center;">
@@ -1708,11 +1950,20 @@ function closeRespuesta() {
   if (respuestaTargetId) openDetail(respuestaTargetId);
 }
 
+function toggleMrFeedback() {
+  const fb = document.getElementById('mr-feedback').value;
+  const hint = document.getElementById('mr-feedback-hint');
+  // Show hint only for positive feedbacks that warrant seguimiento
+  const needsSeg = fb && fb !== 'No califica' && fb !== 'No le interesa';
+  hint.style.display = needsSeg ? 'block' : 'none';
+}
+
 function saveRespuesta() {
   const r = records.find(x=>x.id===respuestaTargetId);
   if (!r) return;
   const asesor = document.getElementById('mr-asesor').value.trim();
   if (!asesor) { alert('El nombre del asesor es obligatorio.'); return; }
+
   const newResp = {
     asesor,
     esInmo:       document.getElementById('mr-es-inmo').value,
@@ -1721,26 +1972,85 @@ function saveRespuesta() {
     respondio:    document.getElementById('mr-respondio').value,
     feedback:     document.getElementById('mr-feedback').value,
     notas:        document.getElementById('mr-notas').value.trim(),
+    fechaRespuesta: today(),
   };
+
   if (!r.respuestas) r.respuestas = [];
-  if (respuestaEditIdx !== null) {
-    r.respuestas[respuestaEditIdx] = newResp;
+
+  // Si tiene feedback definido → mover de Respuestas a Seguimiento (vinculado al asesor)
+  const tieneFeedback = newResp.feedback && newResp.feedback !== '';
+
+  if (tieneFeedback) {
+    // Eliminar de respuestas (si estaba editando)
+    if (respuestaEditIdx !== null) {
+      r.respuestas.splice(respuestaEditIdx, 1);
+    }
+
+    // Agregar/actualizar en seguimientos vinculado al asesor
+    if (!r.seguimientos) r.seguimientos = [];
+
+    // Buscar si ya existe un seguimiento para este asesor (para actualizar en vez de duplicar)
+    const existeSeg = r.seguimientos.findIndex(s => s.asesorVinculado === asesor);
+
+    const segEntry = {
+      asesorVinculado: asesor,
+      esInmo:          newResp.esInmo,
+      inmobiliaria:    newResp.inmobiliaria,
+      recibioPor:      newResp.recibioPor,
+      feedback:        newResp.feedback,
+      notasRespuesta:  newResp.notas,
+      fechaRespuesta:  newResp.fechaRespuesta,
+      // Historial de seguimiento (notas adicionales post-feedback)
+      historial:       existeSeg >= 0 ? (r.seguimientos[existeSeg].historial || []) : [],
+    };
+
+    if (existeSeg >= 0) {
+      r.seguimientos[existeSeg] = segEntry;
+    } else {
+      r.seguimientos.unshift(segEntry);
+    }
+
+    save();
+    render();
+    closeModal('modal-respuesta');
+    detailInnerTab = 1; // Ir directo a Seguimiento
+    openDetail(respuestaTargetId);
+
   } else {
-    r.respuestas.push(newResp);
+    // Sin feedback → queda en Respuestas normalmente
+    if (respuestaEditIdx !== null) {
+      r.respuestas[respuestaEditIdx] = newResp;
+    } else {
+      r.respuestas.push(newResp);
+    }
+    save();
+    render();
+    closeModal('modal-respuesta');
+    openDetail(respuestaTargetId);
   }
-  save();
-  render();
-  closeModal('modal-respuesta');
-  openDetail(respuestaTargetId);
 }
 
 // ══════════════════════════════════════════════
-//  SEGUIMIENTO DE RESPUESTA (escala 3)
+//  SEGUIMIENTO DE RESPUESTA (vinculado al asesor)
 // ══════════════════════════════════════════════
-let seguimientoTargetId = null;
+let seguimientoTargetId  = null;
+let seguimientoTargetIdx = null; // índice en r.seguimientos
 
-function openSeguimiento(id) {
-  seguimientoTargetId = id;
+function openSeguimiento(id, segIdx) {
+  seguimientoTargetId  = id;
+  seguimientoTargetIdx = segIdx !== undefined ? segIdx : null;
+
+  // Mostrar contexto del asesor vinculado
+  const r = records.find(x=>x.id===id);
+  const ctx = document.getElementById('ms-contexto');
+  if (ctx && segIdx !== undefined && r && r.seguimientos && r.seguimientos[segIdx]) {
+    const s = r.seguimientos[segIdx];
+    ctx.style.display = 'block';
+    ctx.innerHTML = `👤 <strong>${s.asesorVinculado}</strong> — Feedback: <strong>${s.feedback}</strong>`;
+  } else if (ctx) {
+    ctx.style.display = 'none';
+  }
+
   document.getElementById('ms-fecha').value  = today();
   document.getElementById('ms-estado').value = 'En negociación';
   document.getElementById('ms-notas').value  = '';
@@ -1750,21 +2060,104 @@ function openSeguimiento(id) {
 
 function closeSeguimiento() {
   closeModal('modal-seguimiento');
-  if (seguimientoTargetId) openDetail(seguimientoTargetId);
+  if (seguimientoTargetId) {
+    detailInnerTab = 1;
+    openDetail(seguimientoTargetId);
+  }
 }
 
 function saveSeguimiento() {
   const r = records.find(x=>x.id===seguimientoTargetId);
-  if (!r) return;
-  if (!r.seguimientos) r.seguimientos = [];
-  r.seguimientos.unshift({
+  if (!r || !r.seguimientos) return;
+
+  const entrada = {
     fecha:  document.getElementById('ms-fecha').value,
     estado: document.getElementById('ms-estado').value,
     notas:  document.getElementById('ms-notas').value.trim(),
-  });
+  };
+
+  if (seguimientoTargetIdx !== null && r.seguimientos[seguimientoTargetIdx]) {
+    // Agregar nota al historial del seguimiento vinculado
+    if (!r.seguimientos[seguimientoTargetIdx].historial) {
+      r.seguimientos[seguimientoTargetIdx].historial = [];
+    }
+    r.seguimientos[seguimientoTargetIdx].historial.unshift(entrada);
+  }
+
   save();
   closeModal('modal-seguimiento');
+  detailInnerTab = 1;
   openDetail(seguimientoTargetId);
+}
+
+// ══════════════════════════════════════════════
+//  MODAL SEARCH HELPERS
+// ══════════════════════════════════════════════
+
+// Search bar in modal-respuesta: autocomplete from existing asesores
+function filterRespuestaSearch() {
+  const q = document.getElementById('mr-search').value.trim().toLowerCase();
+  const resultsEl = document.getElementById('mr-search-results');
+  if (!q) { resultsEl.style.display = 'none'; return; }
+
+  // Collect unique asesor names from all respuestas across records
+  const names = [...new Set(
+    records.flatMap(r => (r.respuestas||[]).map(x => x.asesor).filter(Boolean))
+  )].filter(n => n.toLowerCase().includes(q));
+
+  if (!names.length) { resultsEl.style.display = 'none'; return; }
+
+  resultsEl.style.display = 'block';
+  resultsEl.innerHTML = names.slice(0,6).map(n => `
+    <div onclick="selectRespuestaAsesor('${n.replace(/'/g,"\\'")}') "
+      style="padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border-light);"
+      onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+      👤 ${n}
+    </div>`).join('');
+}
+
+function selectRespuestaAsesor(name) {
+  document.getElementById('mr-asesor').value = name;
+  document.getElementById('mr-search').value = '';
+  document.getElementById('mr-search-results').style.display = 'none';
+}
+
+// Search bar in modal-inmueble-sol: autocomplete from existing inmuebles enviados
+function filterInmuebleSolSearch() {
+  const q = document.getElementById('fi-search').value.trim().toLowerCase();
+  const resultsEl = document.getElementById('fi-search-results');
+  if (!q) { resultsEl.style.display = 'none'; return; }
+
+  const inmuebles = [...new Set(
+    records.filter(r => r.tipo === 'Enviado' && r.inmueble).map(r => r.inmueble)
+  )].filter(n => n.toLowerCase().includes(q));
+
+  if (!inmuebles.length) { resultsEl.style.display = 'none'; return; }
+
+  resultsEl.style.display = 'block';
+  resultsEl.innerHTML = inmuebles.slice(0,6).map(n => `
+    <div onclick="selectInmuebleSol('${n.replace(/'/g,"\\'")}') "
+      style="padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border-light);"
+      onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+      🏠 ${n}
+    </div>`).join('');
+}
+
+function selectInmuebleSol(name) {
+  document.getElementById('fi-nombre').value = name;
+  document.getElementById('fi-search').value = '';
+  document.getElementById('fi-search-results').style.display = 'none';
+}
+
+// Search bar in detail modal: filters visible respuestas or inmuebles
+let detailSearchQuery = '';
+
+function filterDetailContent() {
+  detailSearchQuery = document.getElementById('detail-search-input').value.trim().toLowerCase();
+  const r = records.find(x => x.id === detailId);
+  if (!r) return;
+  if (r.tipo === 'Enviado') renderDetailEnviado(r);
+  else renderDetailSolicitud(r);
 }
 
 // ══════════════════════════════════════════════
@@ -1956,6 +2349,13 @@ function confirmCancel() {
 function closeModal(id) {
   document.getElementById(id).classList.remove('open');
   if (id==='modal-enviado' || id==='modal-solicitud') editingId = null;
+  if (id==='modal-detail') {
+    detailSearchQuery = '';
+    const inp = document.getElementById('detail-search-input');
+    if (inp) inp.value = '';
+    const wrap = document.getElementById('detail-search-wrap');
+    if (wrap) wrap.style.display = 'none';
+  }
 }
 
 document.querySelectorAll('.modal-bg').forEach(m => {
