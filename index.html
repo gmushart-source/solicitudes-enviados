@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🏠 CRM Comercial Inmobiliario</title>
+<title>CRM Inmobiliario Comercial</title>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://www.gstatic.com">
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
@@ -230,6 +230,13 @@
   .status-btn.active-activa { background:var(--accent-bg);color:var(--accent);border-color:#93C5FD; }
   .status-btn.active-cerrada { background:var(--bg);color:var(--text-2);border-color:var(--border); }
 
+  /* Enviado cerrado/negociación */
+  .tag-closed { background:#F1F5F9;color:#475569;border:1px solid #CBD5E1; }
+  .cierre-env-wrap { margin-top:10px;padding:12px 14px;background:#F8FAFC;border:1px solid var(--border);border-radius:var(--radius-sm); }
+  .cierre-env-negoc { background:var(--green-bg);border-color:#BBF7D0; }
+  .btn-revert { background:#FFF7ED;color:#C2410C;border:1px solid #FED7AA;padding:4px 12px;font-size:11px;font-weight:500;cursor:pointer;border-radius:20px;transition:all .12s; }
+  .btn-revert:hover { background:#FFEDD5; }
+
   /* Cierre motivo */
   .cierre-motivo-wrap { margin-top:8px;padding:10px 12px;background:var(--red-bg);border:1px solid #FCA5A5;border-radius:var(--radius-sm); }
 
@@ -289,7 +296,6 @@
   <!-- SIDEBAR -->
   <nav class="sidebar">
     <div class="logo">
-      <div class="logo-mark">🏠</div>
       <div class="logo-name">CRM Inmobiliario</div>
       <div class="logo-sub">Control Comercial</div>
     </div>
@@ -297,19 +303,19 @@
     <div class="nav-section">
       <div class="nav-label">Vistas</div>
       <div class="nav-item active" onclick="setView('hoy',event)">
-        <span class="nav-icon">🗓️</span><span>Hoy</span>
+        <span class="nav-icon">◈</span><span>Hoy</span>
       </div>
       <div class="nav-item" onclick="setView('todos',event)">
-        <span class="nav-icon">📋</span><span>Todos</span>
+        <span class="nav-icon">≡</span><span>Todos</span>
       </div>
       <div class="nav-item" onclick="setView('enviados',event)">
-        <span class="nav-icon">📤</span><span>Enviados</span>
+        <span class="nav-icon">↑</span><span>Enviados</span>
       </div>
       <div class="nav-item" onclick="setView('pipeline',event)">
-        <span class="nav-icon">🔀</span><span>Pipeline</span>
+        <span class="nav-icon">→</span><span>Pipeline</span>
       </div>
       <div class="nav-item" onclick="setView('solicitudes',event)">
-        <span class="nav-icon">📥</span><span>Solicitudes</span>
+        <span class="nav-icon">↓</span><span>Solicitudes</span>
         <span class="nav-badge" id="badge-sol">0</span>
       </div>
     </div>
@@ -317,29 +323,29 @@
     <div class="nav-section">
       <div class="nav-label">Reportes</div>
       <div class="nav-item" onclick="setView('semanal',event)">
-        <span class="nav-icon">📆</span><span>Vista semanal</span>
+        <span class="nav-icon">◷</span><span>Vista semanal</span>
       </div>
       <div class="nav-item" onclick="setView('mensual',event)">
-        <span class="nav-icon">📅</span><span>Vista mensual</span>
+        <span class="nav-icon">◑</span><span>Vista mensual</span>
       </div>
     </div>
 
     <div class="nav-section">
       <div class="nav-label">Opciones</div>
       <div class="nav-item" onclick="openGroupsConfig()">
-        <span class="nav-icon">💬</span><span>Grupos WA</span>
+        <span class="nav-icon">◎</span><span>Grupos WA</span>
       </div>
       <div class="nav-item" onclick="exportarExcel()">
-        <span class="nav-icon">📊</span><span>Exportar Excel</span>
+        <span class="nav-icon">↗</span><span>Exportar Excel</span>
       </div>
     </div>
 
     <div class="sidebar-footer">
       <button class="btn-new btn-new-send" onclick="openNew('enviado')">
-        <span>➕</span><span>Enviado</span>
+        <span>+</span><span>Enviado</span>
       </button>
       <button class="btn-new btn-new-req" onclick="openNew('solicitud')">
-        <span>📥</span><span>Solicitud</span>
+        <span>+</span><span>Solicitud</span>
       </button>
       <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border-light);">
         <div id="user-email-label" style="font-size:11px; color:var(--text-3);
@@ -352,7 +358,7 @@
           background:#fff; color:var(--text-2); transition:all .15s;"
           onmouseover="this.style.background='#FEF2F2';this.style.color='#DC2626';this.style.borderColor='#FECACA';"
           onmouseout="this.style.background='#fff';this.style.color='var(--text-2)';this.style.borderColor='var(--border)';">
-          🚪 Cerrar sesión
+          Cerrar sesión
         </button>
       </div>
     </div>
@@ -363,9 +369,9 @@
 
     <!-- HEADER -->
     <div class="header">
-      <div class="header-title" id="view-title">🗓️ Hoy</div>
+      <div class="header-title" id="view-title">Hoy</div>
       <div class="search-box" onclick="document.getElementById('search-input').focus()">
-        🔍 <input id="search-input" type="text" placeholder="Buscar inmueble, asesor…" style="background:none;border:none;outline:none;flex:1;font-size:13px;color:var(--text)" oninput="render()">
+        ⌕ <input id="search-input" type="text" placeholder="Buscar inmueble, asesor…" style="background:none;border:none;outline:none;flex:1;font-size:13px;color:var(--text)" oninput="render()">
       </div>
     </div>
 
@@ -373,7 +379,7 @@
     <div class="kpi-bar-split" id="kpi-bar-container">
       <!-- Enviados group -->
       <div class="kpi-group">
-        <div class="kpi-group-title">📤 Enviados</div>
+        <div class="kpi-group-title">Enviados</div>
         <div class="kpi-group-row">
           <div class="kpi kpi-blue" style="padding:10px 12px;">
             <div class="kpi-label">Hoy</div>
@@ -381,17 +387,17 @@
             <div class="kpi-sub">Tipo = Enviado</div>
           </div>
           <div class="kpi kpi-green" style="padding:10px 12px;">
-            <div class="kpi-label">✅ Con respuesta</div>
+            <div class="kpi-label">Con respuesta</div>
             <div class="kpi-num" id="k2">0</div>
             <div class="kpi-sub">Respondió = Sí</div>
           </div>
           <div class="kpi kpi-amber" style="padding:10px 12px;">
-            <div class="kpi-label">⏳ Sin respuesta</div>
+            <div class="kpi-label">Sin respuesta</div>
             <div class="kpi-num" id="k3">0</div>
             <div class="kpi-sub">Pendientes</div>
           </div>
           <div class="kpi kpi-purple" style="padding:10px 12px;">
-            <div class="kpi-label">💬 Total resp.</div>
+            <div class="kpi-label">Total resp.</div>
             <div class="kpi-num" id="k5">0</div>
             <div class="kpi-sub">Todas las respuestas</div>
           </div>
@@ -399,25 +405,25 @@
       </div>
       <!-- Solicitudes group -->
       <div class="kpi-group">
-        <div class="kpi-group-title">📥 Solicitudes</div>
+        <div class="kpi-group-title">Solicitudes</div>
         <div class="kpi-group-row">
           <div class="kpi kpi-amber" style="padding:10px 12px;">
-            <div class="kpi-label">⏳ Pendientes</div>
+            <div class="kpi-label">Pendientes</div>
             <div class="kpi-num" id="k4">0</div>
             <div class="kpi-sub">Estado = Pendiente</div>
           </div>
           <div class="kpi kpi-blue" style="padding:10px 12px;">
-            <div class="kpi-label">🔵 Activas</div>
+            <div class="kpi-label">Activas</div>
             <div class="kpi-num" id="k6">0</div>
             <div class="kpi-sub">Estado = Activa</div>
           </div>
           <div class="kpi kpi-green" style="padding:10px 12px;">
-            <div class="kpi-label">🤝 Negociación</div>
+            <div class="kpi-label">Negociación</div>
             <div class="kpi-num" id="k7">0</div>
             <div class="kpi-sub">Cerró c/ negoc.</div>
           </div>
           <div class="kpi kpi-red" style="padding:10px 12px;">
-            <div class="kpi-label">❌ Desistió</div>
+            <div class="kpi-label">Desistió</div>
             <div class="kpi-num" id="k8">0</div>
             <div class="kpi-sub">Cliente desistió</div>
           </div>
@@ -441,7 +447,7 @@
 <div class="modal-bg" id="modal-enviado">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title" id="modal-enviado-title">📤 Registrar inmueble enviado</div>
+      <div class="modal-title" id="modal-enviado-title">Registrar inmueble enviado</div>
       <button class="modal-close" onclick="closeModal('modal-enviado')">×</button>
     </div>
     <div class="modal-body">
@@ -499,12 +505,12 @@
 <div class="modal-bg" id="modal-respuesta">
   <div class="modal" style="max-width:480px;">
     <div class="modal-header">
-      <div class="modal-title" id="mr-title">💬 Registrar respuesta de un asesor</div>
+      <div class="modal-title" id="mr-title">Registrar respuesta de un asesor</div>
       <button class="modal-close" onclick="closeModal('modal-respuesta')">×</button>
     </div>
     <div style="padding:12px 20px 0;">
       <div class="modal-search">
-        🔍 <input id="mr-search" type="text" placeholder="Buscar asesor existente…" oninput="filterRespuestaSearch()" autocomplete="off">
+        ⌕ <input id="mr-search" type="text" placeholder="Buscar asesor existente…" oninput="filterRespuestaSearch()" autocomplete="off">
       </div>
       <div id="mr-search-results" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;max-height:120px;overflow-y:auto;"></div>
     </div>
@@ -533,9 +539,9 @@
       <div class="field-row">
         <label class="field-label">¿Se le envió el inmueble?</label>
         <select id="mr-respondio" onchange="toggleMrExtra()">
-          <option value="Pendiente">⏳ Pendiente</option>
-          <option value="Sí">✅ Sí</option>
-          <option value="No">❌ No</option>
+          <option value="Pendiente">Pendiente</option>
+          <option value="Sí">Sí</option>
+          <option value="No">No</option>
         </select>
       </div>
       <div id="mr-extra" style="display:none;">
@@ -543,15 +549,15 @@
           <label class="field-label">Feedback recibido</label>
           <select id="mr-feedback" onchange="toggleMrFeedback()">
             <option value="">— Sin especificar —</option>
-            <option value="Interesado">✅ Interesado</option>
-            <option value="Solicita visita">📅 Solicita visita</option>
-            <option value="No le interesa">❌ No le interesa</option>
-            <option value="Precio alto">💰 Precio alto</option>
-            <option value="Lo tiene en cartera">📁 Lo tiene en cartera</option>
-            <option value="No califica">🚫 No califica</option>
+            <option value="Interesado">Interesado</option>
+            <option value="Solicita visita">Solicita visita</option>
+            <option value="No le interesa">No le interesa</option>
+            <option value="Precio alto">Precio alto</option>
+            <option value="Lo tiene en cartera">Lo tiene en cartera</option>
+            <option value="No califica">No califica</option>
           </select>
           <div id="mr-feedback-hint" style="display:none;margin-top:6px;padding:7px 10px;border-radius:var(--radius-sm);font-size:12px;background:var(--accent-bg);color:var(--accent);border:1px solid #BFDBFE;">
-            💡 Al guardar, esta respuesta pasará a <strong>Seguimiento</strong> para continuar el proceso.
+            Al guardar, esta respuesta pasará a <strong>Seguimiento</strong> para continuar el proceso.
           </div>
         </div>
       </div>
@@ -574,7 +580,7 @@
 <div class="modal-bg" id="modal-seguimiento">
   <div class="modal" style="max-width:480px;">
     <div class="modal-header">
-      <div class="modal-title">🔄 Agregar nota de seguimiento</div>
+      <div class="modal-title">Agregar nota de seguimiento</div>
       <button class="modal-close" onclick="closeModal('modal-seguimiento')">×</button>
     </div>
     <div class="modal-body">
@@ -587,12 +593,12 @@
       <div class="field-row">
         <label class="field-label">Estado del seguimiento</label>
         <select id="ms-estado">
-          <option value="En negociación">🤝 En negociación</option>
-          <option value="Visita agendada">📅 Visita agendada</option>
-          <option value="Oferta enviada">📄 Oferta enviada</option>
-          <option value="Cerrado positivo">✅ Cerrado positivo</option>
-          <option value="Cerrado negativo">❌ Cerrado negativo</option>
-          <option value="Sin novedad">— Sin novedad</option>
+          <option value="En negociación">En negociación</option>
+          <option value="Visita agendada">Visita agendada</option>
+          <option value="Oferta enviada">Oferta enviada</option>
+          <option value="Cerrado positivo">Cerrado positivo</option>
+          <option value="Cerrado negativo">Cerrado negativo</option>
+          <option value="Sin novedad">Sin novedad</option>
         </select>
       </div>
       <div class="field-row">
@@ -615,7 +621,7 @@
 <div class="modal-bg" id="modal-solicitud">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title" id="modal-sol-title">📥 Nueva solicitud recibida</div>
+      <div class="modal-title" id="modal-sol-title">Nueva solicitud recibida</div>
       <button class="modal-close" onclick="closeModal('modal-solicitud')">×</button>
     </div>
     <div class="modal-body">
@@ -650,17 +656,17 @@
       <div class="field-row">
         <label class="field-label">Estado actual</label>
         <select id="fs-estado" onchange="toggleFsEstado()">
-          <option value="Pendiente">⏳ Pendiente — sin opciones aún</option>
-          <option value="Activa">🔵 Activa — en proceso</option>
-          <option value="Cerrada">🔒 Cerrada</option>
+          <option value="Pendiente">Pendiente — sin opciones aún</option>
+          <option value="Activa">Activa — en proceso</option>
+          <option value="Cerrada">Cerrada</option>
         </select>
       </div>
       <div id="fs-cierre-wrap" style="display:none;">
         <div class="field-row">
           <label class="field-label">Motivo de cierre <span>*</span></label>
           <select id="fs-cierre-motivo">
-            <option value="Negociación">🤝 Se hizo negociación / venta</option>
-            <option value="Desistió">❌ El cliente desistió</option>
+            <option value="Negociación">Se hizo negociación / venta</option>
+            <option value="Desistió">El cliente desistió</option>
           </select>
         </div>
       </div>
@@ -687,12 +693,12 @@
 <div class="modal-bg" id="modal-inmueble-sol">
   <div class="modal" style="max-width:480px;">
     <div class="modal-header">
-      <div class="modal-title" id="modal-inmueble-sol-title">🏠 Agregar inmueble recibido</div>
+      <div class="modal-title" id="modal-inmueble-sol-title">Agregar inmueble recibido</div>
       <button class="modal-close" onclick="closeModal('modal-inmueble-sol')">×</button>
     </div>
     <div style="padding:12px 20px 0;">
       <div class="modal-search">
-        🔍 <input id="fi-search" type="text" placeholder="Buscar inmueble ya registrado…" oninput="filterInmuebleSolSearch()" autocomplete="off">
+        ⌕ <input id="fi-search" type="text" placeholder="Buscar inmueble ya registrado…" oninput="filterInmuebleSolSearch()" autocomplete="off">
       </div>
       <div id="fi-search-results" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;max-height:120px;overflow-y:auto;"></div>
     </div>
@@ -730,22 +736,6 @@
         <label class="field-label">Feedback detallado / comentarios del asesor</label>
         <textarea id="fi-feedback-detalle" placeholder="¿Qué dijo el asesor sobre esta propiedad? ¿Hay interés? ¿Próximo paso?…" style="min-height:65px;"></textarea>
       </div>
-      <div class="section-sep" style="margin-top:12px;">Seguimiento de esta propiedad</div>
-      <div class="field-row">
-        <label class="field-label">Estado de seguimiento</label>
-        <select id="fi-seguimiento-estado">
-          <option value="">— Sin seguimiento —</option>
-          <option value="En evaluación">🔍 En evaluación</option>
-          <option value="Interesado">✅ Interesado</option>
-          <option value="Visita agendada">📅 Visita agendada</option>
-          <option value="En negociación">🤝 En negociación</option>
-          <option value="No aplica">❌ No aplica</option>
-        </select>
-      </div>
-      <div class="field-row">
-        <label class="field-label">Nota de seguimiento</label>
-        <textarea id="fi-seguimiento-nota" placeholder="¿Qué pasó? ¿Cuál es el próximo paso para este inmueble?…" style="min-height:55px;"></textarea>
-      </div>
       <div class="field-row">
         <label class="field-label">Notas internas</label>
         <textarea id="fi-notas" placeholder="Observaciones sobre este inmueble…" style="min-height:45px;"></textarea>
@@ -770,14 +760,69 @@
     </div>
     <div id="detail-search-wrap" style="display:none;padding:12px 20px 0;">
       <div class="modal-search">
-        🔍 <input id="detail-search-input" type="text" placeholder="Buscar respuesta o asesor…" oninput="filterDetailContent()">
+        ⌕ <input id="detail-search-input" type="text" placeholder="Buscar respuesta o asesor…" oninput="filterDetailContent()">
       </div>
     </div>
     <div class="modal-body" id="detail-body"></div>
     <div class="modal-footer">
-      <button class="btn btn-danger" onclick="deleteRecord()">🗑 Eliminar</button>
-      <button class="btn btn-ghost" onclick="editRecord()">✏️ Editar</button>
+      <button class="btn btn-danger" onclick="deleteRecord()">Eliminar</button>
+      <button class="btn btn-ghost" onclick="editRecord()">Editar</button>
       <button class="btn btn-primary" onclick="closeModal('modal-detail')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     MODAL: CIERRE DE INMUEBLE ENVIADO
+════════════════════════════════════════════ -->
+<div class="modal-bg" id="modal-cierre-env">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-header">
+      <div class="modal-title">Cerrar inmueble — registrar negociación</div>
+      <button class="modal-close" onclick="closeModal('modal-cierre-env')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <label class="field-label">¿Entró en negociación?</label>
+        <select id="cie-negoc" onchange="toggleCieNegoc()">
+          <option value="Sí">Sí — hay negociación activa</option>
+          <option value="No">No — se cierra sin negociación</option>
+        </select>
+      </div>
+      <div id="cie-negoc-wrap">
+        <div class="field-row">
+          <label class="field-label">¿Con quién se está negociando?</label>
+          <select id="cie-fuente" onchange="toggleCieFuente()">
+            <option value="lista">Con alguien a quien se le envió</option>
+            <option value="otro">Con otro asesor (externo)</option>
+          </select>
+        </div>
+        <div id="cie-lista-wrap" style="margin-bottom:14px;">
+          <label class="field-label">Seleccionar asesor de la lista</label>
+          <select id="cie-asesor-lista">
+            <option value="">— Seleccione —</option>
+          </select>
+        </div>
+        <div id="cie-otro-wrap" style="display:none;">
+          <div class="field-row">
+            <label class="field-label">Nombre del asesor</label>
+            <input type="text" id="cie-asesor-nombre" placeholder="Nombre del asesor externo">
+          </div>
+        </div>
+        <div class="field-row">
+          <label class="field-label">Fecha de la reserva</label>
+          <input type="date" id="cie-fecha-reserva">
+        </div>
+        <div class="field-row">
+          <label class="field-label">Notas adicionales</label>
+          <textarea id="cie-notas" placeholder="Condiciones de la negociación, monto, observaciones…" style="min-height:60px;"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-cierre-env')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveCierreEnv()">Confirmar cierre</button>
     </div>
   </div>
 </div>
@@ -789,7 +834,7 @@
 <div class="modal-bg" id="modal-groups">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">💬 Gestionar grupos de WhatsApp</div>
+      <div class="modal-title">Gestionar grupos de WhatsApp</div>
       <button class="modal-close" onclick="closeModal('modal-groups')">×</button>
     </div>
     <div class="groups-config" id="groups-config-body"></div>
@@ -807,7 +852,7 @@
 <div class="modal-bg" id="modal-confirm">
   <div class="modal" style="max-width:380px;">
     <div class="modal-header">
-      <div class="modal-title">🗑 Confirmar eliminación</div>
+      <div class="modal-title">Confirmar eliminación</div>
     </div>
     <div class="modal-body">
       <p id="confirm-msg" style="font-size:14px;color:var(--text-2);line-height:1.6;"></p>
@@ -851,18 +896,19 @@ const FEED_MAP   = {'Interesado':'green','Solicita visita':'amber','No le intere
 const ESTADO_MAP = {Pendiente:'amber', Activa:'blue', Cerrada:'gray'};
 const PASADO_MAP = {'Sí':'green', 'No':'amber'};
 const CIERRE_MAP = {'Negociación':'green', 'Desistió':'red'};
+const ENV_CIERRE_MAP = {Cerrado:'closed'};
 
 // ══════════════════════════════════════════════
 //  VIEW ROUTING
 // ══════════════════════════════════════════════
 const VIEWS = {
-  hoy:         { label:'🗓️ Hoy',              tabs:['Tabla'] },
-  todos:       { label:'📋 Todos',             tabs:['Tabla','Por asesor'] },
-  enviados:    { label:'📤 Enviados',           tabs:['Tabla','Por asesor'] },
-  pipeline:    { label:'🔀 Pipeline difusión', tabs:['Tablero','Tabla'] },
-  solicitudes: { label:'📥 Solicitudes',       tabs:['Tablero','Tabla'] },
-  semanal:     { label:'📆 Vista semanal',     tabs:['Resumen'] },
-  mensual:     { label:'📅 Vista mensual',     tabs:['Resumen'] },
+  hoy:         { label:'Hoy',              tabs:['Tabla'] },
+  todos:       { label:'Todos',             tabs:['Tabla','Por asesor'] },
+  enviados:    { label:'Enviados',           tabs:['Tabla','Por asesor'] },
+  pipeline:    { label:'Pipeline difusión', tabs:['Tablero','Tabla'] },
+  solicitudes: { label:'Solicitudes',       tabs:['Tablero','Tabla'] },
+  semanal:     { label:'Vista semanal',     tabs:['Resumen'] },
+  mensual:     { label:'Vista mensual',     tabs:['Resumen'] },
 };
 let activeTab = 0;
 
@@ -977,7 +1023,7 @@ function renderResumen(area) {
   const keys = Object.keys(groups_map).sort().reverse();
 
   if (!keys.length) {
-    area.innerHTML = `<div class="table-wrap"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">Sin datos todavía</div><div class="empty-sub">Agrega registros para ver el resumen ${isWeek?'semanal':'mensual'}</div></div></div>`;
+    area.innerHTML = `<div class="table-wrap"><div class="empty-state"><div class="empty-icon">—</div><div class="empty-text">Sin datos todavía</div><div class="empty-sub">Agrega registros para ver el resumen ${isWeek?'semanal':'mensual'}</div></div></div>`;
     return;
   }
 
@@ -1000,14 +1046,14 @@ function renderResumen(area) {
     return `
       <div class="table-container" style="margin-bottom:14px;">
         <div class="table-toolbar" style="background:var(--bg);">
-          <strong style="font-size:13px;">${isWeek?'📆':'📅'} ${k}</strong>
+          <strong style="font-size:13px;">${isWeek?'':''}${k}</strong>
         </div>
         <div style="padding:14px;">
           <div class="kpi-bar" style="grid-template-columns:repeat(4,1fr);padding:0;background:none;border:none;margin-bottom:14px;">
-            <div class="kpi kpi-blue"><div class="kpi-label">📤 Enviados</div><div class="kpi-num">${totalEnv}</div><div class="kpi-sub">Inmuebles enviados</div></div>
-            <div class="kpi kpi-green"><div class="kpi-label">✅ Con respuesta</div><div class="kpi-num">${conResp}</div><div class="kpi-sub">Al menos un Sí</div></div>
-            <div class="kpi kpi-amber"><div class="kpi-label">⏳ Sin respuesta</div><div class="kpi-num">${sinResp}</div><div class="kpi-sub">Con pendientes</div></div>
-            <div class="kpi kpi-purple"><div class="kpi-label">💬 Respuestas totales</div><div class="kpi-num">${totalRespuestas}</div><div class="kpi-sub">${enviadosSi} con envío = Sí</div></div>
+            <div class="kpi kpi-blue"><div class="kpi-label">Enviados</div><div class="kpi-num">${totalEnv}</div><div class="kpi-sub">Inmuebles enviados</div></div>
+            <div class="kpi kpi-green"><div class="kpi-label">Con respuesta</div><div class="kpi-num">${conResp}</div><div class="kpi-sub">Al menos un Sí</div></div>
+            <div class="kpi kpi-amber"><div class="kpi-label">Sin respuesta</div><div class="kpi-num">${sinResp}</div><div class="kpi-sub">Con pendientes</div></div>
+            <div class="kpi kpi-purple"><div class="kpi-label">Respuestas totales</div><div class="kpi-num">${totalRespuestas}</div><div class="kpi-sub">${enviadosSi} con envío = Sí</div></div>
           </div>
           <table>
             <thead><tr><th>Inmueble</th><th>Asesor</th><th>Fecha</th><th>Respuestas</th></tr></thead>
@@ -1022,7 +1068,7 @@ function renderResumen(area) {
             </tbody>
           </table>
 
-          <div style="margin-top:14px;font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;">📥 Solicitudes — ${totalSol} (Pend: ${solPend} · Activas: ${solActiva} · Negoc: ${solCerrNeg} · Desistió: ${solCerrDes})</div>
+          <div style="margin-top:14px;font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;">Solicitudes — ${totalSol} (Pend: ${solPend} · Activas: ${solActiva} · Negoc: ${solCerrNeg} · Desistió: ${solCerrDes})</div>
           <table style="margin-top:6px;">
             <thead><tr><th>Solicitud</th><th>Asesor</th><th>Fecha</th><th>Estado</th></tr></thead>
             <tbody>
@@ -1085,7 +1131,7 @@ function renderTable(data, area) {
     </tr>
   `).join('') : `<tr><td colspan="${cols.length}">
     <div class="empty-state">
-      <div class="empty-icon">📭</div>
+      <div class="empty-icon">—</div>
       <div class="empty-text">Sin registros en esta vista</div>
       <div class="empty-sub">Usa los botones del panel izquierdo para agregar</div>
     </div>
@@ -1149,7 +1195,7 @@ function renderBoard(data, area) {
   const colLabels = isPipeline
     ? {'':'Sin respuesta','Interesado':'Interesado','Solicita visita':'Solicita visita',
        'No le interesa':'No le interesa','Precio alto':'Precio alto','Lo tiene en cartera':'En cartera'}
-    : {Pendiente:'⏳ Pendiente', Activa:'🔵 Activa', Cerrada:'🔒 Cerrada'};
+    : {Pendiente:'Pendiente', Activa:'Activa', Cerrada:'Cerrada'};
 
   const grouped = {};
   colsDef.forEach(c => grouped[c] = []);
@@ -1201,14 +1247,14 @@ function renderGrouped(data, area) {
   });
 
   if (!Object.keys(groups_map).length) {
-    area.innerHTML = `<div class="table-wrap"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">Sin datos</div></div></div>`;
+    area.innerHTML = `<div class="table-wrap"><div class="empty-state"><div class="empty-icon">—</div><div class="empty-text">Sin datos</div></div></div>`;
     return;
   }
 
   const html = Object.entries(groups_map).map(([key, rows]) => `
     <div class="table-container" style="margin-bottom:14px;">
       <div class="table-toolbar" style="background:var(--bg);">
-        <strong style="font-size:13px;">👤 ${key}</strong>
+        <strong style="font-size:13px;">${key}</strong>
         <span class="toolbar-text" style="margin-left:8px;">${rows.length} registro${rows.length!==1?'s':''}</span>
       </div>
       <table>
@@ -1258,7 +1304,7 @@ let detailInnerTab = 0;
 
 function renderDetailEnviado(r, forceTab) {
   if (forceTab !== undefined) detailInnerTab = forceTab;
-  const grupo_tags = (r.grupos||[]).map(g=>`<span class="tag tag-teal">💬 ${g}</span>`).join(' ');
+  const grupo_tags = (r.grupos||[]).map(g=>`<span class="tag tag-teal">${g}</span>`).join(' ');
 
   const respuestas     = r.respuestas     || [];
   const seguimientoList = r.seguimientos  || [];
@@ -1287,29 +1333,29 @@ function renderDetailEnviado(r, forceTab) {
         const origIdx = respuestas.indexOf(resp);
         const respClass = resp.respondio==='Sí' ? 'respondio-si' : resp.respondio==='No' ? 'respondio-no' : '';
         const inmoBadge = resp.esInmo==='Sí' && resp.inmobiliaria
-          ? `<span class="inmo-badge">🏢 ${resp.inmobiliaria}</span>`
-          : (resp.esInmo==='Sí' ? `<span class="inmo-badge">🏢 Inmobiliaria</span>` : '');
+          ? `<span class="inmo-badge">${resp.inmobiliaria}</span>`
+          : (resp.esInmo==='Sí' ? `<span class="inmo-badge">Inmobiliaria</span>` : '');
         return `
         <div class="seguimiento-box ${respClass}" style="margin-bottom:8px;">
           <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;">
-            <span style="font-size:13px;font-weight:500;">👤 ${resp.asesor||'—'}</span>
+            <span style="font-size:13px;font-weight:500;">${resp.asesor||'—'}</span>
             <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
               ${inmoBadge}
               ${tagColor(resp.respondio||'Pendiente', RESP_MAP)}
             </div>
           </div>
-          ${resp.recibioPor?`<div style="margin-top:4px;font-size:11px;color:var(--text-3);">📥 Recibido por: ${resp.recibioPor}</div>`:''}
+          ${resp.recibioPor?`<div style="margin-top:4px;font-size:11px;color:var(--text-3);">Recibido por: ${resp.recibioPor}</div>`:''}
           ${resp.notas?`<div style="margin-top:6px;font-size:12px;color:var(--text-2);line-height:1.4;">${resp.notas}</div>`:''}
-          <div style="margin-top:6px;font-size:11px;color:var(--accent);">💡 Edita esta respuesta y agrega un feedback para pasarla a Seguimiento.</div>
+          <div style="margin-top:6px;font-size:11px;color:var(--accent);">Edita esta respuesta y agrega un feedback para pasarla a Seguimiento.</div>
           <div style="margin-top:8px;display:flex;gap:6px;">
-            <button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="openRespuesta('${r.id}',${origIdx})">✏️ Editar / agregar feedback</button>
-            <button class="btn btn-danger" style="font-size:11px;padding:3px 10px;" onclick="deleteRespuesta('${r.id}',${origIdx})">🗑</button>
+            <button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="openRespuesta('${r.id}',${origIdx})">Editar / agregar feedback</button>
+            <button class="btn btn-danger" style="font-size:11px;padding:3px 10px;" onclick="deleteRespuesta('${r.id}',${origIdx})">Eliminar</button>
           </div>
         </div>`;
       }).join('')
     : (q
         ? `<div style="font-size:13px;color:var(--text-3);padding:8px 0;">Sin resultados para "<strong>${q}</strong>".</div>`
-        : `<div style="font-size:13px;color:var(--text-2);padding:8px 0;">⏳ Sin respuestas pendientes de feedback.</div>`);
+        : `<div style="font-size:13px;color:var(--text-2);padding:8px 0;">Sin respuestas pendientes de feedback.</div>`);
 
   // ─── TAB SEGUIMIENTO: tarjetas vinculadas al asesor ───
   const FEED_COLOR = {
@@ -1357,7 +1403,7 @@ function renderDetailEnviado(r, forceTab) {
         const fColor = FEED_COLOR[s.feedback] || '#6B6960';
         const fBg    = FEED_BG[s.feedback]    || '#F7F6F3';
         const inmoBadge = s.esInmo==='Sí' && s.inmobiliaria
-          ? `<span class="inmo-badge" style="margin-left:4px;">🏢 ${s.inmobiliaria}</span>` : '';
+          ? `<span class="inmo-badge" style="margin-left:4px;">${s.inmobiliaria}</span>` : '';
 
         // Historial de notas de seguimiento
         const histHTML = (s.historial||[]).length
@@ -1365,7 +1411,6 @@ function renderDetailEnviado(r, forceTab) {
               const sc = SEG_ESTADO_COLOR[h.estado] || SEG_ESTADO_COLOR['Sin novedad'];
               return `
               <div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--border-light);">
-                <div style="font-size:15px;line-height:1;margin-top:1px;">🔄</div>
                 <div style="flex:1;">
                   <span style="display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:${sc.bg};color:${sc.color};border:1px solid ${sc.border};">${h.estado}</span>
                   ${h.notas?`<div style="font-size:12px;color:var(--text-2);margin-top:3px;">${h.notas}</div>`:''}
@@ -1382,15 +1427,15 @@ function renderDetailEnviado(r, forceTab) {
           <!-- Cabecera: asesor + feedback -->
           <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              <span style="font-size:13px;font-weight:600;">👤 ${s.asesorVinculado||'—'}</span>
+              <span style="font-size:13px;font-weight:600;">${s.asesorVinculado||'—'}</span>
               ${inmoBadge}
             </div>
             <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:${fBg};color:${fColor};border:1px solid ${fColor}22;">${s.feedback||'Sin feedback'}</span>
           </div>
           <!-- Info de la respuesta original -->
           <div style="background:var(--bg);border-radius:var(--radius-sm);padding:7px 10px;margin-bottom:8px;">
-            ${s.recibioPor?`<div style="font-size:11px;color:var(--text-3);">📥 Recibido por: ${s.recibioPor}</div>`:''}
-            ${s.notasRespuesta?`<div style="font-size:12px;color:var(--text-2);margin-top:3px;">💬 ${s.notasRespuesta}</div>`:''}
+            ${s.recibioPor?`<div style="font-size:11px;color:var(--text-3);">Recibido por: ${s.recibioPor}</div>`:''}
+            ${s.notasRespuesta?`<div style="font-size:12px;color:var(--text-2);margin-top:3px;">${s.notasRespuesta}</div>`:''}
             <div style="font-size:10px;color:var(--text-3);margin-top:3px;">${s.fechaRespuesta||''}</div>
           </div>
           <!-- Historial de seguimiento -->
@@ -1398,8 +1443,8 @@ function renderDetailEnviado(r, forceTab) {
           <!-- Botones -->
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
             ${!esNoCalifica ? `<button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="openSeguimiento('${r.id}',${origIdx})">+ Nota de seguimiento</button>` : ''}
-            <button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="editarRespuestaDesdeSegFn('${r.id}',${origIdx})">✏️ Editar respuesta</button>
-            <button class="btn btn-danger" style="font-size:11px;padding:3px 10px;" onclick="deleteSegVinculado('${r.id}',${origIdx})">🗑</button>
+            <button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="editarRespuestaDesdeSegFn('${r.id}',${origIdx})">Editar respuesta</button>
+            <button class="btn btn-danger" style="font-size:11px;padding:3px 10px;" onclick="deleteSegVinculado('${r.id}',${origIdx})">Eliminar</button>
           </div>
         </div>`;
       }).join('')
@@ -1411,10 +1456,10 @@ function renderDetailEnviado(r, forceTab) {
   const tabsHTML = `
     <div class="detail-tabs">
       <div class="detail-tab${detailInnerTab===0?' active':''}" onclick="switchDetailTab('${r.id}',0)">
-        💬 Respuestas<span class="detail-tab-badge">${respuestas.length}</span>
+        Respuestas<span class="detail-tab-badge">${respuestas.length}</span>
       </div>
       <div class="detail-tab${detailInnerTab===1?' active':''}" onclick="switchDetailTab('${r.id}',1)">
-        🔄 Seguimiento<span class="detail-tab-badge">${seguimientoList.length}</span>
+        Seguimiento<span class="detail-tab-badge">${seguimientoList.length}</span>
       </div>
     </div>`;
 
@@ -1438,14 +1483,37 @@ function renderDetailEnviado(r, forceTab) {
   document.getElementById('detail-body').innerHTML = `
     <div class="detail-meta">
       ${tagColor('Enviado', TIPO_MAP)}
+      ${r.estadoCierre === 'Cerrado' ? '<span class="tag tag-closed">Cerrado</span>' : '<span class="tag tag-green">Activo</span>'}
       <span style="font-size:12px;color:var(--text-3)">${r.fecha||''}</span>
     </div>
     <div class="detail-title">${r.inmueble||'—'}</div>
 
+    ${r.estadoCierre === 'Cerrado' ? `
+    <div class="detail-section" style="margin-top:14px;">
+      <div class="detail-section-title">Estado del inmueble</div>
+      <div class="cierre-env-wrap ${r.cierreNegoc?.enNegociacion ? 'cierre-env-negoc' : ''}">
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px;">${r.cierreNegoc?.enNegociacion ? 'En negociación' : 'Cerrado sin negociación'}</div>
+        ${r.cierreNegoc?.enNegociacion ? `
+          <div style="font-size:12px;color:var(--text-2);margin-bottom:3px;">Asesor: <strong>${r.cierreNegoc.asesor||'—'}</strong></div>
+          ${r.cierreNegoc.fechaReserva ? `<div style="font-size:12px;color:var(--text-2);margin-bottom:3px;">Fecha reserva: <strong>${r.cierreNegoc.fechaReserva}</strong></div>` : ''}
+          ${r.cierreNegoc.notas ? `<div style="font-size:12px;color:var(--text-2);margin-top:5px;">${r.cierreNegoc.notas}</div>` : ''}
+        ` : ''}
+        <button class="btn-revert" style="margin-top:8px;" onclick="revertirCierreEnv('${r.id}')">Revertir — marcar como activo</button>
+      </div>
+    </div>
+    ` : `
+    <div class="detail-section" style="margin-top:14px;">
+      <div class="detail-section-title">Estado del inmueble</div>
+      <div style="margin-top:6px;">
+        <button class="btn btn-ghost" style="font-size:12px;padding:5px 14px;border-color:#CBD5E1;" onclick="openCierreEnv('${r.id}')">Marcar como Cerrado</button>
+      </div>
+    </div>
+    `}
+
     <div class="detail-section" style="margin-top:14px;">
       <div class="detail-section-title">Asesor del inmueble</div>
       <div class="detail-field">
-        <span class="detail-field-name">👤 Asesor captador</span>
+        <span class="detail-field-name">Asesor captador</span>
         <span class="detail-field-value">${r.asesor||'—'}</span>
       </div>
     </div>
@@ -1453,7 +1521,7 @@ function renderDetailEnviado(r, forceTab) {
     <div class="detail-section">
       <div class="detail-section-title">Enviado por</div>
       <div class="detail-field">
-        <span class="detail-field-name">🙋 Quién lo envió</span>
+        <span class="detail-field-name">Quién lo envió</span>
         <span class="detail-field-value">${r.enviadoPor||'—'}</span>
       </div>
     </div>
@@ -1461,7 +1529,7 @@ function renderDetailEnviado(r, forceTab) {
     ${(r.grupos&&r.grupos.length) ? `
     <div class="detail-section">
       <div class="detail-section-title">Enviado a</div>
-      <div class="detail-field"><span class="detail-field-name">💬 Grupos WA</span><span class="detail-field-value"><div class="tags-wrap">${grupo_tags}</div></span></div>
+      <div class="detail-field"><span class="detail-field-name">Grupos WA</span><span class="detail-field-value"><div class="tags-wrap">${grupo_tags}</div></span></div>
     </div>`:''}
 
     <div class="detail-section" style="margin-bottom:0;">
@@ -1551,7 +1619,7 @@ function renderDetailSolicitud(r) {
   const inmueblesHTML = inmuebles.length ? `
     <div class="sub-table-wrap">
       <div class="sub-table-head">
-        <span class="sub-table-title">🏠 Inmuebles recibidos (${filteredInmuebles.length}${q?'/'+inmuebles.length:''})</span>
+        <span class="sub-table-title">Inmuebles recibidos (${filteredInmuebles.length}${q?'/'+inmuebles.length:''})</span>
         <button class="btn btn-teal" style="padding:4px 10px;font-size:12px;" onclick="openAddInmuebleSol('${r.id}')">+ Agregar</button>
       </div>
       ${filteredInmuebles.length ? filteredInmuebles.map((m) => {
@@ -1574,12 +1642,12 @@ function renderDetailSolicitud(r) {
           </div>
           <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Enviado por: ${m.quien||'—'}</div>
           ${segBadge ? `<div style="margin-bottom:4px;">${segBadge}</div>` : ''}
-          ${m.feedbackDetalle?`<div style="font-size:12px;color:var(--text-2);margin-top:4px;padding:6px 8px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border-light);">💬 ${m.feedbackDetalle}</div>`:''}
-          ${m.seguimientoNota?`<div style="font-size:12px;color:var(--teal);margin-top:4px;padding:5px 8px;background:var(--teal-bg);border-radius:var(--radius-sm);border:1px solid #99F6E4;">🔄 ${m.seguimientoNota}</div>`:''}
-          ${m.notas?`<div style="font-size:11px;color:var(--text-3);margin-top:3px;">📝 ${m.notas}</div>`:''}
+          ${m.feedbackDetalle?`<div style="font-size:12px;color:var(--text-2);margin-top:4px;padding:6px 8px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border-light);">${m.feedbackDetalle}</div>`:''}
+          ${m.seguimientoNota?`<div style="font-size:12px;color:var(--teal);margin-top:4px;padding:5px 8px;background:var(--teal-bg);border-radius:var(--radius-sm);border:1px solid #99F6E4;">${m.seguimientoNota}</div>`:''}
+          ${m.notas?`<div style="font-size:11px;color:var(--text-3);margin-top:3px;">${m.notas}</div>`:''}
           <div style="display:flex;gap:6px;margin-top:7px;">
-            <button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="openAddInmuebleSol('${r.id}',${i})">✏️ Editar</button>
-            <button class="btn btn-danger" style="font-size:11px;padding:3px 10px;" onclick="deleteInmuebleSol('${r.id}',${i})">🗑 Eliminar</button>
+            <button class="btn btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="openAddInmuebleSol('${r.id}',${i})">Editar</button>
+            <button class="btn btn-danger" style="font-size:11px;padding:3px 10px;" onclick="deleteInmuebleSol('${r.id}',${i})">Eliminar</button>
           </div>
         </div>`
       }).join('') : `<div style="padding:12px;font-size:12px;color:var(--text-3);text-align:center;">Sin resultados para "<strong>${q}</strong>".</div>`}
@@ -1598,17 +1666,17 @@ function renderDetailSolicitud(r) {
       <div style="font-size:11px;color:var(--text-3);margin-bottom:6px;">Cambiar estado:</div>
       <div class="status-quick">
         <button class="status-btn ${estadoActual==='Pendiente'?'active-pend':''}"
-          onclick="quickChangeEstado('${r.id}','Pendiente')">⏳ Pendiente</button>
+          onclick="quickChangeEstado('${r.id}','Pendiente')">Pendiente</button>
         <button class="status-btn ${estadoActual==='Activa'?'active-activa':''}"
-          onclick="quickChangeEstado('${r.id}','Activa')">🔵 Activa</button>
+          onclick="quickChangeEstado('${r.id}','Activa')">Activa</button>
         <button class="status-btn ${estadoActual==='Cerrada'?'active-cerrada':''}"
-          onclick="quickChangeEstado('${r.id}','Cerrada')">🔒 Cerrar</button>
+          onclick="quickChangeEstado('${r.id}','Cerrada')">Cerrar</button>
       </div>
       <div id="quick-cierre-wrap-${r.id}" style="display:none;margin-top:8px;" class="cierre-motivo-wrap">
         <div style="font-size:12px;font-weight:500;margin-bottom:6px;">¿Por qué se cerró?</div>
         <select id="quick-cierre-motivo-${r.id}" style="margin-bottom:8px;">
-          <option value="Negociación">🤝 Se hizo negociación / venta</option>
-          <option value="Desistió">❌ El cliente desistió</option>
+          <option value="Negociación">Se hizo negociación / venta</option>
+          <option value="Desistió">El cliente desistió</option>
         </select>
         <button class="btn btn-primary" style="font-size:12px;padding:5px 14px;width:100%;"
           onclick="quickConfirmCierre('${r.id}')">Confirmar cierre</button>
@@ -1637,18 +1705,18 @@ function renderDetailSolicitud(r) {
     <div class="detail-section">
       <div class="detail-section-title">Especificaciones</div>
       <div class="detail-field">
-        <span class="detail-field-name">📋 Descripción</span>
+        <span class="detail-field-name">Descripción</span>
         <span class="detail-field-value" style="white-space:pre-wrap;">${r.desc||'—'}</span>
       </div>
       <div class="detail-field">
-        <span class="detail-field-name">👤 Asesor (tuyo)</span>
+        <span class="detail-field-name">Asesor (tuyo)</span>
         <span class="detail-field-value">${r.asesor||'—'}</span>
       </div>
       <div class="detail-field">
-        <span class="detail-field-name">📥 Recibida por</span>
+        <span class="detail-field-name">Recibida por</span>
         <span class="detail-field-value">${r.recibioPor||'—'}</span>
       </div>
-      ${r.notas?`<div class="detail-field"><span class="detail-field-name">📝 Notas</span><span class="detail-field-value">${r.notas}</span></div>`:''}
+      ${r.notas?`<div class="detail-field"><span class="detail-field-name">Notas</span><span class="detail-field-value">${r.notas}</span></div>`:''}
     </div>
 
     <div class="detail-section">
@@ -1666,8 +1734,8 @@ function openAddInmuebleSol(id, idx) {
   const r = records.find(x=>x.id===id);
   const m = (editingInmuebleIdx !== null) ? (r?.inmueblesSol||[])[editingInmuebleIdx] : null;
 
-  document.getElementById('modal-inmueble-sol-title').textContent = m ? '✏️ Editar inmueble recibido' : '🏠 Agregar inmueble recibido';
-  document.getElementById('fi-save-btn').textContent = m ? '💾 Guardar cambios' : 'Agregar';
+  document.getElementById('modal-inmueble-sol-title').textContent = m ? 'Editar inmueble recibido' : 'Agregar inmueble recibido';
+  document.getElementById('fi-save-btn').textContent = m ? 'Guardar cambios' : 'Agregar';
   document.getElementById('fi-nombre').value            = m?.nombre||'';
   document.getElementById('fi-quien').value             = m?.quien||'';
   document.getElementById('fi-pasado').value            = m?.pasado||'No';
@@ -1780,7 +1848,7 @@ function saveEnviado() {
   const inmueble = document.getElementById('fe-inmueble').value.trim();
   if (!inmueble) { alert('El nombre del inmueble es obligatorio.'); return; }
 
-  const selectedGrps = [...document.querySelectorAll('#fe-groups-picker .group-chip.selected')].map(el=>el.textContent.trim().replace('💬 ',''));
+  const selectedGrps = [...document.querySelectorAll('#fe-groups-picker .group-chip.selected')].map(el=>el.textContent.trim());
 
   const rec = {
     id:        editingId || uid(),
@@ -1851,7 +1919,7 @@ function openNew(mode, data) {
   const isEdit = !!data;
 
   if (mode === 'enviado') {
-    document.getElementById('modal-enviado-title').textContent = isEdit ? '✏️ Editar inmueble enviado' : '📤 Registrar inmueble enviado';
+    document.getElementById('modal-enviado-title').textContent = isEdit ? 'Editar inmueble enviado' : 'Registrar inmueble enviado';
     document.getElementById('fe-inmueble').value  = data?.inmueble||'';
     document.getElementById('fe-fecha').value     = data?.fecha||today();
     document.getElementById('fe-asesor').value    = data?.asesor||'';
@@ -1861,14 +1929,14 @@ function openNew(mode, data) {
     const selGrps = data?.grupos||[];
     document.getElementById('fe-groups-picker').innerHTML = groups.map(g => `
       <div class="group-chip${selGrps.includes(g)?' selected':''}" onclick="this.classList.toggle('selected')">
-        💬 ${g}
+        ${g}
       </div>
     `).join('');
 
     document.getElementById('modal-enviado').classList.add('open');
 
   } else {
-    document.getElementById('modal-sol-title').textContent = isEdit ? '✏️ Editar solicitud' : '📥 Nueva solicitud recibida';
+    document.getElementById('modal-sol-title').textContent = isEdit ? 'Editar solicitud' : 'Nueva solicitud recibida';
     document.getElementById('fs-desc').value          = data?.desc||'';
     document.getElementById('fs-fecha').value         = data?.fecha||today();
     document.getElementById('fs-asesor').value        = data?.asesor||'';
@@ -1881,8 +1949,8 @@ function openNew(mode, data) {
     const preview = document.getElementById('modal-sol-estado-preview');
     if (isEdit) {
       const estadoActual = data?.estado || 'Pendiente';
-      const estadoLabels = {Pendiente:'⏳ Pendiente', Activa:'🔵 Activa', Cerrada:'🔒 Cerrada'};
-      saveBtn.textContent = '💾 Guardar cambios';
+      const estadoLabels = {Pendiente:'Pendiente', Activa:'Activa', Cerrada:'Cerrada'};
+      saveBtn.textContent = 'Guardar cambios';
       preview.style.display = 'block';
       preview.innerHTML = `Estado actual: <strong>${estadoLabels[estadoActual]||estadoActual}</strong> — los cambios se aplicarán al guardar`;
     } else {
@@ -2046,7 +2114,7 @@ function openSeguimiento(id, segIdx) {
   if (ctx && segIdx !== undefined && r && r.seguimientos && r.seguimientos[segIdx]) {
     const s = r.seguimientos[segIdx];
     ctx.style.display = 'block';
-    ctx.innerHTML = `👤 <strong>${s.asesorVinculado}</strong> — Feedback: <strong>${s.feedback}</strong>`;
+    ctx.innerHTML = `<strong>${s.asesorVinculado}</strong> — Feedback: <strong>${s.feedback}</strong>`;
   } else if (ctx) {
     ctx.style.display = 'none';
   }
@@ -2112,7 +2180,7 @@ function filterRespuestaSearch() {
     <div onclick="selectRespuestaAsesor('${n.replace(/'/g,"\\'")}') "
       style="padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border-light);"
       onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
-      👤 ${n}
+      ${n}
     </div>`).join('');
 }
 
@@ -2139,7 +2207,7 @@ function filterInmuebleSolSearch() {
     <div onclick="selectInmuebleSol('${n.replace(/'/g,"\\'")}') "
       style="padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border-light);"
       onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
-      🏠 ${n}
+      ${n}
     </div>`).join('');
 }
 
@@ -2178,7 +2246,7 @@ function renderGroupsConfig() {
         <input type="text" class="group-name-input" id="group-input-${i}" value="${g}" placeholder="Nombre del grupo"
           oninput="tempGroups[${i}]=this.value"
           onkeydown="if(event.key==='Enter'){event.preventDefault();onGroupEnter(${i});}">
-        <button class="btn-icon" onclick="removeGroup(${i})" title="Eliminar">🗑</button>
+        <button class="btn-icon" onclick="removeGroup(${i})" title="Eliminar">✕</button>
       </div>
     `).join('')}
   `;
@@ -2344,6 +2412,96 @@ function confirmCancel() {
 }
 
 // ══════════════════════════════════════════════
+//  CIERRE DE INMUEBLE ENVIADO
+// ══════════════════════════════════════════════
+let cierreEnvTargetId = null;
+
+function openCierreEnv(id) {
+  cierreEnvTargetId = id;
+  const r = records.find(x=>x.id===id);
+  if (!r) return;
+
+  // Poblar lista de asesores que respondieron
+  const asesores = [...new Set([
+    ...(r.respuestas||[]).map(x=>x.asesor).filter(Boolean),
+    ...(r.seguimientos||[]).map(x=>x.asesorVinculado).filter(Boolean),
+  ])];
+  const listaSelect = document.getElementById('cie-asesor-lista');
+  listaSelect.innerHTML = '<option value="">— Seleccione —</option>' +
+    asesores.map(a=>`<option value="${a.replace(/"/g,'&quot;')}">${a}</option>`).join('');
+
+  // Si no hay asesores conocidos, ir directo a "otro"
+  if (!asesores.length) {
+    document.getElementById('cie-fuente').value = 'otro';
+    document.getElementById('cie-lista-wrap').style.display = 'none';
+    document.getElementById('cie-otro-wrap').style.display = 'block';
+  } else {
+    document.getElementById('cie-fuente').value = 'lista';
+    document.getElementById('cie-lista-wrap').style.display = 'block';
+    document.getElementById('cie-otro-wrap').style.display = 'none';
+  }
+
+  document.getElementById('cie-negoc').value = 'Sí';
+  document.getElementById('cie-negoc-wrap').style.display = 'block';
+  document.getElementById('cie-fecha-reserva').value = today();
+  document.getElementById('cie-asesor-nombre').value = '';
+  document.getElementById('cie-notas').value = '';
+
+  closeModal('modal-detail');
+  document.getElementById('modal-cierre-env').classList.add('open');
+}
+
+function toggleCieNegoc() {
+  const v = document.getElementById('cie-negoc').value;
+  document.getElementById('cie-negoc-wrap').style.display = v==='Sí' ? 'block' : 'none';
+}
+
+function toggleCieFuente() {
+  const v = document.getElementById('cie-fuente').value;
+  document.getElementById('cie-lista-wrap').style.display = v==='lista' ? 'block' : 'none';
+  document.getElementById('cie-otro-wrap').style.display  = v==='otro'  ? 'block' : 'none';
+}
+
+function saveCierreEnv() {
+  const r = records.find(x=>x.id===cierreEnvTargetId);
+  if (!r) return;
+  const negoc = document.getElementById('cie-negoc').value;
+  r.estadoCierre = 'Cerrado';
+
+  if (negoc === 'Sí') {
+    const fuente = document.getElementById('cie-fuente').value;
+    const asesor = fuente === 'lista'
+      ? document.getElementById('cie-asesor-lista').value
+      : document.getElementById('cie-asesor-nombre').value.trim();
+    if (!asesor) { alert('Indique el nombre del asesor en negociación.'); return; }
+    r.cierreNegoc = {
+      enNegociacion: true,
+      asesor,
+      fuenteAsesor: fuente,
+      fechaReserva: document.getElementById('cie-fecha-reserva').value,
+      notas: document.getElementById('cie-notas').value.trim(),
+    };
+  } else {
+    r.cierreNegoc = { enNegociacion: false };
+  }
+
+  save();
+  render();
+  closeModal('modal-cierre-env');
+  openDetail(cierreEnvTargetId);
+}
+
+function revertirCierreEnv(id) {
+  const r = records.find(x=>x.id===id);
+  if (!r) return;
+  r.estadoCierre = '';
+  r.cierreNegoc  = null;
+  save();
+  render();
+  openDetail(id);
+}
+
+// ══════════════════════════════════════════════
 //  MODAL UTILS
 // ══════════════════════════════════════════════
 function closeModal(id) {
@@ -2387,7 +2545,6 @@ document.querySelectorAll('.modal-bg').forEach(m => {
 
     <!-- Logo -->
     <div style="text-align:center; margin-bottom:28px;">
-      <div style="font-size:32px; margin-bottom:6px;">🏠</div>
       <div style="font-size:18px; font-weight:700; color:#1A1916;">CRM Inmobiliario</div>
       <div style="font-size:12px; color:#A09D95; margin-top:2px;">Control Comercial</div>
     </div>
@@ -2434,7 +2591,7 @@ document.querySelectorAll('.modal-bg').forEach(m => {
             style="position:absolute; right:10px; top:50%; transform:translateY(-50%);
             background:none; border:none; cursor:pointer; font-size:17px;
             color:#A09D95; padding:0; line-height:1;" title="Ver / ocultar contraseña">
-            👁
+            ●
           </button>
         </div>
       </div>
@@ -2593,7 +2750,7 @@ document.querySelectorAll('.modal-bg').forEach(m => {
     const passInput = document.getElementById('login-pass');
     const eyeBtn    = document.getElementById('btn-eye');
     if (passInput) passInput.type = 'password';
-    if (eyeBtn)    eyeBtn.textContent = '👁';
+    if (eyeBtn)    eyeBtn.textContent = '●';
 
     // Limpiar etiqueta de correo del usuario anterior
     document.getElementById('user-email-label').textContent = '';
@@ -2609,7 +2766,7 @@ document.querySelectorAll('.modal-bg').forEach(m => {
     if (!email) { mostrarMensaje('Ingresa tu correo primero.', 'error'); return; }
     try {
       await sendPasswordResetEmail(auth, email);
-      mostrarMensaje('✅ Enlace enviado. Revisa tu bandeja de entrada.', 'ok');
+      mostrarMensaje('Enlace enviado. Revisa tu bandeja de entrada.', 'ok');
     } catch (e) {
       const msgs = {
         'auth/user-not-found': 'No hay cuenta registrada con ese correo.',
@@ -2685,10 +2842,10 @@ document.querySelectorAll('.modal-bg').forEach(m => {
     const btn = document.getElementById('btn-eye');
     if (inp.type === 'password') {
       inp.type = 'text';
-      btn.textContent = '🙈';
+      btn.textContent = '○';
     } else {
       inp.type = 'password';
-      btn.textContent = '👁';
+      btn.textContent = '●';
     }
   }
 
