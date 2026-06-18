@@ -1741,8 +1741,6 @@ function openAddInmuebleSol(id, idx) {
   document.getElementById('fi-pasado').value            = m?.pasado||'No';
   document.getElementById('fi-feedback').value          = m?.feedback||'';
   document.getElementById('fi-feedback-detalle').value  = m?.feedbackDetalle||'';
-  document.getElementById('fi-seguimiento-estado').value = m?.seguimientoEstado||'';
-  document.getElementById('fi-seguimiento-nota').value  = m?.seguimientoNota||'';
   document.getElementById('fi-notas').value             = m?.notas||'';
   closeModal('modal-detail');
   document.getElementById('modal-inmueble-sol').classList.add('open');
@@ -1762,8 +1760,6 @@ function saveInmuebleSol() {
     pasado:            document.getElementById('fi-pasado').value,
     feedback:          document.getElementById('fi-feedback').value,
     feedbackDetalle:   document.getElementById('fi-feedback-detalle').value.trim(),
-    seguimientoEstado: document.getElementById('fi-seguimiento-estado').value,
-    seguimientoNota:   document.getElementById('fi-seguimiento-nota').value.trim(),
     notas:             document.getElementById('fi-notas').value.trim(),
   };
 
