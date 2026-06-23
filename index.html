@@ -2925,7 +2925,7 @@ document.querySelectorAll('.modal-bg').forEach(m => {
   //  Documento compartido — todos los
   //  usuarios del equipo ven los mismos datos
   // ──────────────────────────────────
-  const CRM_DOC_ID = 'datos_compartidos'; // ID fijo: un solo documento para todo el equipo
+  const CRM_DOC_ID = 'riHG6sMf3iOcjC2O9PSmBkTT7jE3'; // Documento existente con todos los datos del equipo
 
   // ──────────────────────────────────
   //  Guardar en Firestore (+ caché local
@@ -2970,30 +2970,10 @@ document.querySelectorAll('.modal-bg').forEach(m => {
     try {
       const snapShared = await getDoc(doc(db, 'crm', CRM_DOC_ID));
       if (snapShared.exists()) {
-        // Documento compartido ya existe → cargar normalmente
         const datos = snapShared.data();
         if (Array.isArray(datos.records)) records = datos.records;
         if (Array.isArray(datos.groups))  groups  = datos.groups;
         try { localStorage.setItem('crm_cache_compartido', JSON.stringify(datos)); } catch(e) {}
-      } else {
-        // Documento compartido vacío → intentar migrar datos del uid anterior (solo admin)
-        const userEmail = auth.currentUser?.email || '';
-        if (userEmail === ADMIN_EMAIL) {
-          try {
-            const snapOld = await getDoc(doc(db, 'crm', uid));
-            if (snapOld.exists()) {
-              const datos = snapOld.data();
-              // Copiar al documento compartido
-              await setDoc(doc(db, 'crm', CRM_DOC_ID), datos);
-              if (Array.isArray(datos.records)) records = datos.records;
-              if (Array.isArray(datos.groups))  groups  = datos.groups;
-              try { localStorage.setItem('crm_cache_compartido', JSON.stringify(datos)); } catch(e) {}
-              console.log('Migración completada: datos movidos al documento compartido.');
-            }
-          } catch (migErr) {
-            console.warn('No se pudo migrar datos anteriores:', migErr);
-          }
-        }
       }
     } catch (e) {
       console.error('Error cargando desde Firestore:', e);
