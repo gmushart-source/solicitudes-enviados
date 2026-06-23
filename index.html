@@ -479,8 +479,50 @@
       <!-- Enviado a -->
       <div class="section-sep">Enviado a</div>
       <div class="field-row">
-        <label class="field-label">Grupos de WhatsApp</label>
-        <div class="groups-grid" id="fe-groups-picker"></div>
+        <label class="field-label">Tipo de envío</label>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+            <input type="radio" name="fe-tipo-envio" id="fe-tipo-grupos" value="grupos" onchange="toggleTipoEnvio()" checked>
+            Grupos de WhatsApp
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+            <input type="radio" name="fe-tipo-envio" id="fe-tipo-directo" value="directo" onchange="toggleTipoEnvio()">
+            Asesor directo (respuesta a solicitud)
+          </label>
+        </div>
+      </div>
+
+      <!-- Panel: Grupos WA -->
+      <div id="fe-panel-grupos">
+        <div class="field-row">
+          <label class="field-label">Grupos de WhatsApp</label>
+          <div class="groups-grid" id="fe-groups-picker"></div>
+        </div>
+      </div>
+
+      <!-- Panel: Asesor directo -->
+      <div id="fe-panel-directo" style="display:none;">
+        <div class="field-row">
+          <label class="field-label">Nombre del asesor</label>
+          <input type="text" id="fe-asesor-directo" placeholder="Nombre del asesor que hizo la solicitud">
+        </div>
+        <div class="field-row">
+          <label class="field-label">¿Es de inmobiliaria?</label>
+          <select id="fe-directo-es-inmo" onchange="toggleFeDirectoInmo()">
+            <option value="No">No</option>
+            <option value="Sí">Sí</option>
+          </select>
+        </div>
+        <div id="fe-directo-inmo-wrap" style="display:none;">
+          <div class="field-row">
+            <label class="field-label">Nombre de la inmobiliaria</label>
+            <input type="text" id="fe-directo-inmobiliaria" placeholder="Nombre de la inmobiliaria">
+          </div>
+        </div>
+        <div class="field-row">
+          <label class="field-label">Descripción de la solicitud del asesor</label>
+          <textarea id="fe-directo-solicitud" placeholder="¿Qué tipo de inmueble solicitó? Detalles del pedido…" style="min-height:55px;"></textarea>
+        </div>
       </div>
 
     </div>
@@ -1120,7 +1162,7 @@ function renderTable(data, area) {
     : ['inmueble','asesor','dest','grupos','respuestas','fecha'];
 
   const headers = {
-    inmueble:'Inmueble', asesor:'Asesor', dest:'Destinatario', grupos:'Grupos WA',
+    inmueble:'Inmueble', asesor:'Asesor', dest:'Destinatario', grupos:'Enviado a',
     respuestas:'Respuestas', fecha:'Fecha',
     desc:'Solicitud', estado:'Estado', cierreMotivo:'Motivo cierre', inmueblesSol:'Opciones recibidas'
   };
@@ -1156,7 +1198,14 @@ function cellVal(r, col) {
     case 'inmueble':     return `<strong>${r.inmueble||'—'}</strong>`;
     case 'asesor':       return r.asesor||'—';
     case 'dest':         return r.dest||'—';
-    case 'grupos':       return r.grupos&&r.grupos.length ? `<span class="tag tag-teal">${r.grupos.length} grupo${r.grupos.length!==1?'s':''}</span>` : '—';
+    case 'grupos': {
+      if (r.tipoEnvio === 'directo') {
+        return r.asesorDirecto
+          ? `<span class="tag tag-purple">${r.asesorDirecto}${r.directoEsInmo==='Sí'?' · '+( r.directoInmobiliaria||'Inmo'):''}</span>`
+          : '<span class="tag tag-gray">Directo</span>';
+      }
+      return r.grupos&&r.grupos.length ? `<span class="tag tag-teal">${r.grupos.length} grupo${r.grupos.length!==1?'s':''}</span>` : '—';
+    }
     case 'respuestas': {
       const list = r.respuestas||[];
       if (!list.length) return '<span class="tag tag-amber">Pendiente</span>';
@@ -1526,11 +1575,27 @@ function renderDetailEnviado(r, forceTab) {
       </div>
     </div>
 
-    ${(r.grupos&&r.grupos.length) ? `
+    ${r.tipoEnvio === 'directo' ? `
+    <div class="detail-section">
+      <div class="detail-section-title">Enviado directamente a</div>
+      <div class="detail-field">
+        <span class="detail-field-name">Asesor</span>
+        <span class="detail-field-value">
+          <strong>${r.asesorDirecto||'—'}</strong>
+          ${r.directoEsInmo==='Sí' ? `<span class="inmo-badge" style="margin-left:6px;">${r.directoInmobiliaria||'Inmobiliaria'}</span>` : ''}
+        </span>
+      </div>
+      ${r.directoSolicitud ? `
+      <div class="detail-field">
+        <span class="detail-field-name">Solicitud del asesor</span>
+        <span class="detail-field-value" style="white-space:pre-wrap;">${r.directoSolicitud}</span>
+      </div>` : ''}
+    </div>
+    ` : (r.grupos&&r.grupos.length) ? `
     <div class="detail-section">
       <div class="detail-section-title">Enviado a</div>
       <div class="detail-field"><span class="detail-field-name">Grupos WA</span><span class="detail-field-value"><div class="tags-wrap">${grupo_tags}</div></span></div>
-    </div>`:''}
+    </div>` : ''}
 
     <div class="detail-section" style="margin-bottom:0;">
       ${tabsHTML}
@@ -1838,26 +1903,65 @@ function quickConfirmCierre(id) {
 }
 
 // ══════════════════════════════════════════════
+//  TIPO ENVÍO TOGGLE (modal enviado)
+// ══════════════════════════════════════════════
+function toggleTipoEnvio() {
+  const v = document.querySelector('input[name="fe-tipo-envio"]:checked')?.value || 'grupos';
+  document.getElementById('fe-panel-grupos').style.display  = v === 'grupos'  ? 'block' : 'none';
+  document.getElementById('fe-panel-directo').style.display = v === 'directo' ? 'block' : 'none';
+}
+
+function toggleFeDirectoInmo() {
+  const v = document.getElementById('fe-directo-es-inmo')?.value;
+  const wrap = document.getElementById('fe-directo-inmo-wrap');
+  if (wrap) wrap.style.display = v === 'Sí' ? 'block' : 'none';
+}
+
+// ══════════════════════════════════════════════
 //  SAVE ENVIADO
 // ══════════════════════════════════════════════
 function saveEnviado() {
   const inmueble = document.getElementById('fe-inmueble').value.trim();
   if (!inmueble) { alert('El nombre del inmueble es obligatorio.'); return; }
 
-  const selectedGrps = [...document.querySelectorAll('#fe-groups-picker .group-chip.selected')].map(el=>el.textContent.trim());
+  const tipoEnvio = document.querySelector('input[name="fe-tipo-envio"]:checked')?.value || 'grupos';
+  const selectedGrps = tipoEnvio === 'grupos'
+    ? [...document.querySelectorAll('#fe-groups-picker .group-chip.selected')].map(el=>el.textContent.trim())
+    : [];
+
+  const asesorDirecto      = tipoEnvio === 'directo' ? document.getElementById('fe-asesor-directo').value.trim() : '';
+  const directoEsInmo      = tipoEnvio === 'directo' ? document.getElementById('fe-directo-es-inmo').value : 'No';
+  const directoInmobiliaria= tipoEnvio === 'directo' ? document.getElementById('fe-directo-inmobiliaria').value.trim() : '';
+  const directoSolicitud   = tipoEnvio === 'directo' ? document.getElementById('fe-directo-solicitud').value.trim() : '';
+
+  if (tipoEnvio === 'directo' && !asesorDirecto) {
+    alert('Indica el nombre del asesor al que se le envió directamente.'); return;
+  }
+
+  const existing = editingId ? records.find(r=>r.id===editingId) : null;
 
   const rec = {
-    id:        editingId || uid(),
-    tipo:      'Enviado',
+    id:          editingId || uid(),
+    tipo:        'Enviado',
     inmueble,
-    fecha:     document.getElementById('fe-fecha').value,
-    asesor:    document.getElementById('fe-asesor').value.trim(),
-    enviadoPor: document.getElementById('fe-enviado-por').value.trim(),
-    dest:      document.getElementById('fe-dest').value.trim(),
-    grupos:    selectedGrps,
-    respondio: document.getElementById('fe-respondio').value,
-    feedback:  document.getElementById('fe-feedback').value,
-    notas:     document.getElementById('fe-notas').value.trim(),
+    fecha:       document.getElementById('fe-fecha').value,
+    asesor:      document.getElementById('fe-asesor').value.trim(),
+    enviadoPor:  document.getElementById('fe-enviado-por').value.trim(),
+    dest:        document.getElementById('fe-dest').value.trim(),
+    tipoEnvio,
+    grupos:      selectedGrps,
+    asesorDirecto,
+    directoEsInmo,
+    directoInmobiliaria,
+    directoSolicitud,
+    respondio:   document.getElementById('fe-respondio').value,
+    feedback:    document.getElementById('fe-feedback').value,
+    notas:       document.getElementById('fe-notas').value.trim(),
+    // Preserve existing respuestas/seguimientos when editing
+    respuestas:   existing?.respuestas   || [],
+    seguimientos: existing?.seguimientos || [],
+    estadoCierre: existing?.estadoCierre || '',
+    cierreNegoc:  existing?.cierreNegoc  || null,
   };
 
   if (editingId) {
@@ -1916,10 +2020,15 @@ function openNew(mode, data) {
 
   if (mode === 'enviado') {
     document.getElementById('modal-enviado-title').textContent = isEdit ? 'Editar inmueble enviado' : 'Registrar inmueble enviado';
-    document.getElementById('fe-inmueble').value  = data?.inmueble||'';
-    document.getElementById('fe-fecha').value     = data?.fecha||today();
-    document.getElementById('fe-asesor').value    = data?.asesor||'';
+    document.getElementById('fe-inmueble').value    = data?.inmueble||'';
+    document.getElementById('fe-fecha').value       = data?.fecha||today();
+    document.getElementById('fe-asesor').value      = data?.asesor||'';
     document.getElementById('fe-enviado-por').value = data?.enviadoPor||'';
+
+    // Tipo de envío
+    const tipoEnvio = data?.tipoEnvio || 'grupos';
+    document.getElementById('fe-tipo-grupos').checked  = tipoEnvio === 'grupos';
+    document.getElementById('fe-tipo-directo').checked = tipoEnvio === 'directo';
 
     // Groups picker
     const selGrps = data?.grupos||[];
@@ -1928,6 +2037,15 @@ function openNew(mode, data) {
         ${g}
       </div>
     `).join('');
+
+    // Asesor directo fields
+    document.getElementById('fe-asesor-directo').value       = data?.asesorDirecto||'';
+    document.getElementById('fe-directo-es-inmo').value      = data?.directoEsInmo||'No';
+    document.getElementById('fe-directo-inmobiliaria').value = data?.directoInmobiliaria||'';
+    document.getElementById('fe-directo-solicitud').value    = data?.directoSolicitud||'';
+
+    toggleTipoEnvio();
+    toggleFeDirectoInmo();
 
     document.getElementById('modal-enviado').classList.add('open');
 
