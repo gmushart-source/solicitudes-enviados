@@ -807,8 +807,8 @@
     </div>
     <div class="modal-body" id="detail-body"></div>
     <div class="modal-footer">
-      <button class="btn btn-danger" onclick="deleteRecord()">Eliminar</button>
-      <button class="btn btn-ghost" onclick="editRecord()">Editar</button>
+      <button id="btn-detail-delete" class="btn btn-danger" onclick="deleteRecord()">Eliminar</button>
+      <button id="btn-detail-edit"   class="btn btn-ghost"  onclick="editRecord()">Editar</button>
       <button class="btn btn-primary" onclick="closeModal('modal-detail')">Cerrar</button>
     </div>
   </div>
@@ -917,6 +917,12 @@ let currentView = 'hoy';
 let editingId   = null;
 let detailId    = null;
 let addingInmuebleToSolId = null;
+
+// ── Permisos multi-usuario ──────────────────
+const ADMIN_EMAIL = 'inmovaly@gmail.com';
+let currentUserEmail = '';
+const isAdmin     = () => currentUserEmail === ADMIN_EMAIL;
+const puedeEditar = (rec) => isAdmin() || (rec && rec.creadoPor === currentUserEmail);
 
 // ══════════════════════════════════════════════
 //  UTILS
@@ -1339,6 +1345,13 @@ function openDetail(id) {
   }
   detailId = id;
 
+  // Mostrar u ocultar botones de editar/eliminar según permisos
+  const puedeE = puedeEditar(r);
+  const btnDel = document.getElementById('btn-detail-delete');
+  const btnEdt = document.getElementById('btn-detail-edit');
+  if (btnDel) btnDel.style.display = puedeE ? '' : 'none';
+  if (btnEdt) btnEdt.style.display = puedeE ? '' : 'none';
+
   if (r.tipo === 'Enviado') {
     renderDetailEnviado(r);
   } else {
@@ -1534,6 +1547,7 @@ function renderDetailEnviado(r, forceTab) {
       ${tagColor('Enviado', TIPO_MAP)}
       ${r.estadoCierre === 'Cerrado' ? '<span class="tag tag-closed">Cerrado</span>' : '<span class="tag tag-green">Activo</span>'}
       <span style="font-size:12px;color:var(--text-3)">${r.fecha||''}</span>
+      ${r.creadoPor ? `<span style="font-size:11px;color:var(--text-3);margin-left:auto;">👤 ${r.creadoPor}</span>` : ''}
     </div>
     <div class="detail-title">${r.inmueble||'—'}</div>
 
@@ -1759,6 +1773,7 @@ function renderDetailSolicitud(r) {
       ${tagColor(estadoActual, ESTADO_MAP)}
       ${r.cierreMotivo?tagColor(r.cierreMotivo,CIERRE_MAP):''}
       <span style="font-size:12px;color:var(--text-3)">${r.fecha||''}</span>
+      ${r.creadoPor ? `<span style="font-size:11px;color:var(--text-3);margin-left:auto;">👤 ${r.creadoPor}</span>` : ''}
     </div>
     <div class="detail-title" style="font-size:15px;margin-bottom:10px;">${r.desc ? (r.desc.length>80?r.desc.slice(0,80)+'…':r.desc) : '—'}</div>
 
@@ -1962,6 +1977,8 @@ function saveEnviado() {
     seguimientos: existing?.seguimientos || [],
     estadoCierre: existing?.estadoCierre || '',
     cierreNegoc:  existing?.cierreNegoc  || null,
+    // Permisos: quién creó este registro
+    creadoPor:    existing?.creadoPor    || currentUserEmail,
   };
 
   if (editingId) {
@@ -1998,6 +2015,8 @@ function saveSolicitud() {
     cierreMotivo: estado === 'Cerrada' ? document.getElementById('fs-cierre-motivo').value : '',
     notas:        document.getElementById('fs-notas').value.trim(),
     inmueblesSol: existing ? (existing.inmueblesSol||[]) : [],
+    // Permisos: quién creó este registro
+    creadoPor:    existing?.creadoPor || currentUserEmail,
   };
 
   if (editingId) {
@@ -2077,14 +2096,24 @@ function openNew(mode, data) {
 }
 
 function editRecord() {
-  closeModal('modal-detail');
   const r = records.find(x=>x.id===detailId);
   if (!r) return;
+  if (!puedeEditar(r)) {
+    alert('Solo puedes editar registros que tú mismo creaste.');
+    return;
+  }
+  closeModal('modal-detail');
   editingId = detailId;
   openNew(r.tipo==='Enviado' ? 'enviado' : 'solicitud', r);
 }
 
 function deleteRecord() {
+  const r = records.find(x=>x.id===detailId);
+  if (!r) return;
+  if (!puedeEditar(r)) {
+    alert('Solo puedes eliminar registros que tú mismo creaste.');
+    return;
+  }
   showConfirm('¿Seguro que deseas eliminar este registro? Esta acción no se puede deshacer.', () => {
     records = records.filter(x=>x.id!==detailId);
     save();
@@ -2798,12 +2827,14 @@ document.querySelectorAll('.modal-bg').forEach(m => {
   // ──────────────────────────────────
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      // Usuario autenticado → cargar datos y mostrar app
+      // Usuario autenticado → registrar email, cargar datos y mostrar app
+      currentUserEmail = user.email || '';
       await cargarDatosNube(user.uid);
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('user-email-label').textContent = user.email;
     } else {
       // Sin sesión → limpiar datos en memoria y mostrar login
+      currentUserEmail = '';
       records = [];
       groups  = ["Grupo Asesores VLC","Grupo Caracas Pro","Red Inmobiliaria","Grupo Norte","Grupo Sur"];
       document.getElementById('login-screen').style.display = 'flex';
@@ -2891,6 +2922,12 @@ document.querySelectorAll('.modal-bg').forEach(m => {
   };
 
   // ──────────────────────────────────
+  //  Documento compartido — todos los
+  //  usuarios del equipo ven los mismos datos
+  // ──────────────────────────────────
+  const CRM_DOC_ID = 'datos_compartidos'; // ID fijo: un solo documento para todo el equipo
+
+  // ──────────────────────────────────
   //  Guardar en Firestore (+ caché local
   //  para que la próxima carga sea instantánea)
   // ──────────────────────────────────
@@ -2898,12 +2935,12 @@ document.querySelectorAll('.modal-bg').forEach(m => {
     const user = auth.currentUser;
     if (!user) return;
     try {
-      localStorage.setItem('crm_cache_' + user.uid, JSON.stringify(datos));
+      localStorage.setItem('crm_cache_compartido', JSON.stringify(datos));
     } catch (e) {
       console.warn('No se pudo guardar la caché local:', e);
     }
     try {
-      await setDoc(doc(db, 'crm', user.uid), datos);
+      await setDoc(doc(db, 'crm', CRM_DOC_ID), datos);
     } catch (e) {
       console.error('Error guardando en Firestore:', e);
     }
@@ -2917,7 +2954,7 @@ document.querySelectorAll('.modal-bg').forEach(m => {
   async function cargarDatosNube(uid) {
     // Paso 1: caché local → primer pintado instantáneo
     try {
-      const cached = localStorage.getItem('crm_cache_' + uid);
+      const cached = localStorage.getItem('crm_cache_compartido');
       if (cached) {
         const datos = JSON.parse(cached);
         if (Array.isArray(datos.records)) records = datos.records;
@@ -2929,14 +2966,34 @@ document.querySelectorAll('.modal-bg').forEach(m => {
       console.warn('No se pudo leer la caché local:', e);
     }
 
-    // Paso 2: datos reales desde Firestore
+    // Paso 2: datos reales desde Firestore (documento compartido del equipo)
     try {
-      const snap = await getDoc(doc(db, 'crm', uid));
-      if (snap.exists()) {
-        const datos = snap.data();
+      const snapShared = await getDoc(doc(db, 'crm', CRM_DOC_ID));
+      if (snapShared.exists()) {
+        // Documento compartido ya existe → cargar normalmente
+        const datos = snapShared.data();
         if (Array.isArray(datos.records)) records = datos.records;
         if (Array.isArray(datos.groups))  groups  = datos.groups;
-        try { localStorage.setItem('crm_cache_' + uid, JSON.stringify(datos)); } catch(e) {}
+        try { localStorage.setItem('crm_cache_compartido', JSON.stringify(datos)); } catch(e) {}
+      } else {
+        // Documento compartido vacío → intentar migrar datos del uid anterior (solo admin)
+        const userEmail = auth.currentUser?.email || '';
+        if (userEmail === ADMIN_EMAIL) {
+          try {
+            const snapOld = await getDoc(doc(db, 'crm', uid));
+            if (snapOld.exists()) {
+              const datos = snapOld.data();
+              // Copiar al documento compartido
+              await setDoc(doc(db, 'crm', CRM_DOC_ID), datos);
+              if (Array.isArray(datos.records)) records = datos.records;
+              if (Array.isArray(datos.groups))  groups  = datos.groups;
+              try { localStorage.setItem('crm_cache_compartido', JSON.stringify(datos)); } catch(e) {}
+              console.log('Migración completada: datos movidos al documento compartido.');
+            }
+          } catch (migErr) {
+            console.warn('No se pudo migrar datos anteriores:', migErr);
+          }
+        }
       }
     } catch (e) {
       console.error('Error cargando desde Firestore:', e);
